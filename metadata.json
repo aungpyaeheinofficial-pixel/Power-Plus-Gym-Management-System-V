@@ -1,0 +1,7 @@
+{
+  "name": "Power Plus Gym Management",
+  "description": "A premium, bilingual (Myanmar/English) Gym POS and Management System featuring a dark/gold aesthetic, member tracking, sales analytics, and attendance systems.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
