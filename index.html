@@ -1,32 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Power Plus Gym - Management System</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Myanmar:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+Myanmar:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         darkMode: 'class',
         theme: {
           extend: {
             colors: {
+              brand: {
+                yellow: '#FFEB3B',
+                highlight: '#FDD835',
+                gold: '#FBC02D',
+                black: '#0A0A0A',
+                surface: '#1A1A1A',
+                card: '#1F1F1F',
+                border: '#2A2A2A',
+                text: '#FAFAFA',
+                muted: '#A1A1AA'
+              },
               gold: {
-                300: '#FDE047',
-                400: '#FFD700',
-                500: '#FFC107',
-                600: '#D4AF37',
-                700: '#B4941F',
+                300: '#FFF59D',
+                400: '#FFF176',
+                500: '#FFEB3B',
+                600: '#FDD835',
+                700: '#FBC02D',
               },
               dark: {
-                800: '#1a1a1a',
-                900: '#0a0a0a',
-                950: '#050505',
+                800: '#1F1F1F',
+                900: '#1A1A1A',
+                950: '#0A0A0A',
               }
             },
             fontFamily: {
               sans: ['Inter', 'Noto Sans Myanmar', 'sans-serif'],
+            },
+            boxShadow: {
+                'glow': '0 0 20px rgba(255, 235, 59, 0.15)',
+                'glow-hover': '0 0 30px rgba(255, 235, 59, 0.3)'
             },
             animation: {
                 'fade-in': 'fadeIn 0.3s ease-out forwards',
@@ -34,6 +49,7 @@
                 'slide-in-right': 'slideInRight 0.3s ease-out forwards',
                 'pulse-slow': 'pulse 3s infinite',
                 'bounce-slight': 'bounceSlight 2s infinite',
+                'shimmer': 'shimmer 2s infinite linear',
             },
             keyframes: {
                 fadeIn: {
@@ -51,6 +67,10 @@
                 bounceSlight: {
                     '0%, 100%': { transform: 'translateY(0)' },
                     '50%': { transform: 'translateY(-5px)' },
+                },
+                shimmer: {
+                    '0%': { backgroundPosition: '-200% center' },
+                    '100%': { backgroundPosition: '200% center' }
                 }
             }
           }
@@ -58,44 +78,74 @@
       }
     </script>
     <style>
+      :root {
+        --glass-bg: rgba(26, 26, 26, 0.85);
+        --glass-border: rgba(255, 235, 59, 0.1);
+        --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        --bg-texture: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+        --card-bg: rgba(26, 26, 26, 0.6);
+      }
+
+      body {
+          font-feature-settings: "ss01", "ss02", "cv01", "cv02";
+      }
+
       /* Custom scrollbar */
       ::-webkit-scrollbar {
         width: 6px;
         height: 6px;
       }
       ::-webkit-scrollbar-track {
-        background: #0a0a0a; 
+        background: #0a0a0a;
       }
       ::-webkit-scrollbar-thumb {
-        background: #333; 
+        background: #333;
         border-radius: 10px;
       }
       ::-webkit-scrollbar-thumb:hover {
-        background: #FFC107; 
+        background: #FFEB3B;
       }
       
       .glass-panel {
-        background: rgba(30, 30, 30, 0.6);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        box-shadow: var(--glass-shadow);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+      
+      /* Premium Dark Card Style */
+      .premium-card {
+        background: linear-gradient(145deg, #1A1A1A, #0F0F0F);
+        border: 1px solid rgba(255, 235, 59, 0.1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .premium-card:hover {
+        border-color: rgba(255, 235, 59, 0.3);
+        box-shadow: 0 12px 48px rgba(255, 235, 59, 0.15);
+        background: linear-gradient(145deg, #1A1A1A, #0F0F0F);
+        transform: translateY(-4px);
       }
       
       .glass-card-hover {
         transition: all 0.3s ease;
       }
       .glass-card-hover:hover {
-        background: rgba(255, 215, 0, 0.05);
-        border-color: rgba(255, 215, 0, 0.3);
-        transform: translateY(-2px);
-        box-shadow: 0 10px 40px -10px rgba(255, 215, 0, 0.1);
+        transform: translateY(-4px) scale(1.01);
+        border-color: rgba(255, 235, 59, 0.3);
+        box-shadow: 0 12px 48px rgba(255, 235, 59, 0.15);
       }
 
       .text-gradient-gold {
-          background: linear-gradient(135deg, #FFD700 0%, #FFC107 100%);
+          background: linear-gradient(135deg, #FFEB3B 0%, #FBC02D 100%);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
+      }
+      
+      .main-bg {
+          background-image: var(--bg-texture);
       }
 
       /* Hide scrollbar for clean horizontal scrolls */
@@ -105,6 +155,22 @@
       .scrollbar-hide {
           -ms-overflow-style: none;
           scrollbar-width: none;
+      }
+
+      /* Button Styles */
+      .btn-primary {
+          background: linear-gradient(135deg, #FFEB3B, #FDD835);
+          color: #0A0A0A;
+          font-weight: 700;
+          box-shadow: 0 4px 20px rgba(255, 235, 59, 0.2);
+          transition: all 0.3s ease;
+      }
+      .btn-primary:hover {
+          box-shadow: 0 6px 30px rgba(255, 235, 59, 0.4);
+          transform: translateY(-2px);
+      }
+      .btn-primary:active {
+          transform: translateY(0);
       }
     </style>
   <script type="importmap">
@@ -123,7 +189,7 @@
 }
 </script>
 </head>
-  <body class="bg-dark-950 text-gray-100 antialiased overflow-hidden selection:bg-gold-500 selection:text-black">
+  <body class="bg-brand-black text-brand-text antialiased overflow-hidden selection:bg-brand-yellow selection:text-black">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

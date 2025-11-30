@@ -1,4 +1,5 @@
 
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Language, Member, Product, Transaction, CheckIn, Staff, MembershipType, ProductCategory, StaffSchedule, StaffAttendance, WeeklySchedule } from '../types';
 import { MOCK_MEMBERS, MOCK_PRODUCTS, INITIAL_TRANSACTIONS, MOCK_MEMBERSHIP_TYPES, MOCK_STAFF, MOCK_CATEGORIES } from '../constants';
@@ -7,9 +8,10 @@ interface AppContextType {
   user: User | null;
   login: (u: User) => void;
   logout: () => void;
+  
   language: Language;
   setLanguage: (l: Language) => void;
-  
+
   members: Member[];
   addMember: (m: Member) => void;
   updateMember: (id: string, m: Partial<Member>) => void;
@@ -22,6 +24,7 @@ interface AppContextType {
   
   productCategories: ProductCategory[];
   addProductCategory: (c: ProductCategory) => void;
+  updateProductCategory: (id: string, c: Partial<ProductCategory>) => void;
   deleteProductCategory: (id: string) => void;
   
   transactions: Transaction[];
@@ -73,6 +76,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     const storedUser = localStorage.getItem('ppg_user');
     if (storedUser) setUser(JSON.parse(storedUser));
+    
+    // Enforce Dark Mode
+    document.documentElement.classList.add('dark');
   }, []);
 
   const login = (u: User) => {
@@ -94,6 +100,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const deleteProduct = (id: string) => setProducts(prev => prev.filter(p => p.id !== id));
 
   const addProductCategory = (c: ProductCategory) => setProductCategories(prev => [...prev, c]);
+  const updateProductCategory = (id: string, data: Partial<ProductCategory>) => setProductCategories(prev => prev.map(c => c.id === id ? { ...c, ...data } : c));
   const deleteProductCategory = (id: string) => setProductCategories(prev => prev.filter(c => c.id !== id));
 
   const addTransaction = (t: Transaction) => {
@@ -123,10 +130,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const staffMember = staff.find(s => s.id === staffId);
       const now = new Date();
       
-      // Default status
       let status: StaffAttendance['status'] = 'Working';
 
-      // Late Check logic
       if (staffMember?.weeklySchedule) {
           const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
           const todaySchedule = staffMember.weeklySchedule[days[now.getDay()] as keyof WeeklySchedule];
@@ -136,7 +141,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               const scheduleTime = new Date(now);
               scheduleTime.setHours(h, m, 0, 0);
               
-              // Allow 15 min grace period
               const diffMinutes = (now.getTime() - scheduleTime.getTime()) / 60000;
               if (diffMinutes > 15) {
                   status = 'Late';
@@ -147,7 +151,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const newRecord: StaffAttendance = {
           id: Date.now().toString(),
           staffId,
-          date: now.toISOString().split('T')[0], // YYYY-MM-DD format for storage/grouping
+          date: now.toISOString().split('T')[0], 
           clockIn: now.toISOString(),
           status: status,
           hoursWorked: 0,
@@ -158,7 +162,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const clockOutStaff = (staffId: string) => {
       setStaffAttendance(prev => {
-          // Find the active record (Working or Late) that hasn't been clocked out
           const recordIndex = prev.findIndex(r => r.staffId === staffId && !r.clockOut);
           
           if (recordIndex >= 0) {
@@ -258,7 +261,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       language, setLanguage,
       members, addMember, updateMember, deleteMember,
       products, addProduct, updateProduct, deleteProduct,
-      productCategories, addProductCategory, deleteProductCategory,
+      productCategories, addProductCategory, updateProductCategory, deleteProductCategory,
       transactions, addTransaction,
       checkIns, addCheckIn,
       staff, addStaff, updateStaff, deleteStaff,

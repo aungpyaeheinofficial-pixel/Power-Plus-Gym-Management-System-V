@@ -22,7 +22,7 @@ const AppContent: React.FC = () => {
 
   const renderPage = () => {
     switch (currentPage) {
-      case 'dashboard': return <Dashboard />;
+      case 'dashboard': return <Dashboard onNavigate={setCurrentPage} />;
       case 'members': return <Members />;
       case 'pos': return <POS />;
       case 'inventory': return <Inventory />;
@@ -30,7 +30,7 @@ const AppContent: React.FC = () => {
       case 'checkin': return <CheckInPage />;
       case 'reports': return <ReportsPage />;
       case 'settings': return <Settings onNavigate={setCurrentPage} />;
-      default: return <Dashboard />;
+      default: return <Dashboard onNavigate={setCurrentPage} />;
     }
   };
 
