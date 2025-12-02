@@ -5,10 +5,10 @@ const config: CapacitorConfig = {
   appName: 'Power Plus Gym',
   webDir: 'dist',
   server: {
-    // For development, you can use your local IP
-    // For production, remove this or set to your production URL
-    // url: 'http://YOUR_LOCAL_IP:5173',
-    // cleartext: true
+    // Load app from server for automatic updates
+    // When you update the server, all apps get the update automatically!
+    url: 'http://167.172.90.182:4000',
+    cleartext: true  // Allow HTTP (use HTTPS in production)
   },
   android: {
     allowMixedContent: true,
