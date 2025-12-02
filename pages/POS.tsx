@@ -262,7 +262,7 @@ export const POS: React.FC = () => {
         showCart || cartItemCount === 0 
           ? 'mt-24 lg:mt-0' 
           : 'hidden lg:flex'
-      } ${showCart ? 'fixed inset-y-0 right-0 z-40 lg:relative lg:z-auto' : 'lg:flex'}`}>
+      } ${showCart ? 'fixed inset-y-0 right-0 z-40 lg:relative lg:z-auto pb-24 lg:pb-0' : 'lg:flex'}`}>
         <div className="p-5 border-b border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ShoppingCart className="text-gold-500" size={20} />
@@ -322,8 +322,8 @@ export const POS: React.FC = () => {
           )}
         </div>
 
-        {/* Totals Section */}
-        <div className="p-5 bg-dark-950 border-t border-white/10">
+        {/* Totals Section - Sticky at bottom on mobile */}
+        <div className="p-5 bg-dark-950 border-t border-white/10 sticky bottom-0 lg:relative z-10">
           <div className="space-y-2 mb-4">
             <div className="flex justify-between text-gray-400 text-sm">
                 <span>Subtotal</span>
