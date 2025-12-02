@@ -82,14 +82,7 @@ app.put('/api/users/reset-password', async (req, res) => {
       return res.status(401).json({ error: 'Invalid current password' });
     }
     
-    const user = rows[0];
-    
-    // Only admin can reset passwords (or user can reset their own)
-    if (user.role !== 'Admin' && rows[0].username !== username) {
-      return res.status(403).json({ error: 'Only admin can reset passwords' });
-    }
-    
-    // Update password
+    // Update password (user resetting their own password)
     await pool.execute(
       'UPDATE users SET password_hash = ? WHERE username = ?',
       [newPassword, username]
@@ -104,12 +97,12 @@ app.put('/api/users/reset-password', async (req, res) => {
 app.put('/api/users/:id/reset-password', async (req, res) => {
   try {
     const { id } = req.params;
-    const { newPassword, adminPassword } = req.body;
+    const { newPassword, adminUsername, adminPassword } = req.body;
     
-    // Verify admin password
+    // Verify admin credentials
     const [adminRows]: any = await pool.query(
-      'SELECT id, role FROM users WHERE id = ? AND password_hash = ? AND role = ?',
-      [id, adminPassword, 'Admin']
+      'SELECT id, role FROM users WHERE username = ? AND password_hash = ? AND role = ?',
+      [adminUsername, adminPassword, 'Admin']
     );
     
     if (adminRows.length === 0) {
