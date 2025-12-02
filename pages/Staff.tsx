@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { TRANSLATIONS } from '../constants';
+import { getSafeImageSrc, handleImageError } from '../utils/imageUtils';
 import { 
   Search, Plus, UserCog, Calendar, Clock, Phone, Mail, 
   CheckCircle, AlertCircle, LogIn, LogOut, LayoutGrid, List, 

@@ -73,7 +73,18 @@ export const CheckInPage: React.FC = () => {
                                         onClick={() => handleSelectMember(m)}
                                         className="p-3 hover:bg-white/10 cursor-pointer flex items-center gap-3 border-b border-white/5 last:border-0"
                                     >
-                                        <img src={m.photoUrl} className="w-10 h-10 rounded-full object-cover" />
+                                        {getSafeImageSrc(m.photoUrl) ? (
+                                            <img 
+                                                src={getSafeImageSrc(m.photoUrl)} 
+                                                className="w-10 h-10 rounded-full object-cover"
+                                                onError={handleImageError}
+                                                alt={m.fullNameEN}
+                                            />
+                                        ) : (
+                                            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                                                <User size={16} className="text-gray-500" />
+                                            </div>
+                                        )}
                                         <div>
                                             <p className="font-bold text-white text-sm">{m.fullNameEN}</p>
                                             <p className="text-xs text-gold-500">{m.memberId}</p>
