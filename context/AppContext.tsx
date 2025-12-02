@@ -152,7 +152,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         memberId: t.member_id?.toString(),
         memberName: t.member_name,
         type: t.type,
-        items: t.items || [],
+        items: (t.items || []).map((item: any) => ({
+          name: item.name,
+          quantity: item.quantity,
+          price: parseFloat(item.price),
+          type: item.item_type, // Map item_type from database to type
+        })),
         subtotal: parseFloat(t.subtotal),
         discount: parseFloat(t.discount),
         total: parseFloat(t.total),

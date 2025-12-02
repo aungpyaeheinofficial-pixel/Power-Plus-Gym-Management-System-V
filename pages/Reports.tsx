@@ -70,18 +70,53 @@ export const ReportsPage: React.FC = () => {
         let productsRev = 0;
 
         transactions.forEach(t => {
-            const tDate = new Date(t.date);
+            if (!t.date) return; // Skip if no date
+            
+            // Handle both ISO string and MySQL datetime format
+            let tDate: Date;
+            if (typeof t.date === 'string') {
+                // MySQL datetime format: "2025-12-02 10:30:00" or ISO: "2025-12-02T10:30:00.000Z"
+                tDate = new Date(t.date.replace(' ', 'T'));
+            } else {
+                tDate = new Date(t.date);
+            }
+            
+            // Check if date is valid
+            if (isNaN(tDate.getTime())) {
+                console.warn('Invalid date:', t.date);
+                return;
+            }
+            
             if (tDate.getMonth() === monthFilter && tDate.getFullYear() === yearFilter) {
                 // Split logic
-                if (t.type === 'Membership') membership += t.total;
-                else if (t.type === 'Product') productsRev += t.total;
-                else {
-                    // Mixed
-                    t.items.forEach(item => {
-                        const amount = item.price * item.quantity;
-                        if (item.type === 'Membership') membership += amount;
-                        else productsRev += amount;
-                    });
+                if (t.type === 'Membership') {
+                    membership += t.total;
+                } else if (t.type === 'Product') {
+                    productsRev += t.total;
+                } else if (t.type === 'Mixed') {
+                    // Mixed - split by item type
+                    if (t.items && Array.isArray(t.items)) {
+                        t.items.forEach((item: any) => {
+                            const amount = (item.price || 0) * (item.quantity || 0);
+                            if (item.type === 'Membership') {
+                                membership += amount;
+                            } else if (item.type === 'Product') {
+                                productsRev += amount;
+                            }
+                        });
+                    }
+                } else {
+                    // Fallback: if type is unknown, try to determine from items
+                    if (t.items && Array.isArray(t.items) && t.items.length > 0) {
+                        t.items.forEach((item: any) => {
+                            const amount = (item.price || 0) * (item.quantity || 0);
+                            if (item.type === 'Membership') {
+                                membership += amount;
+                            } else if (item.type === 'Product') {
+                                productsRev += amount;
+                            }
+                        });
+                    }
                 }
             }
         });
