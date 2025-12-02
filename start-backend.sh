@@ -4,6 +4,12 @@
 
 cd /var/www/html/Power-Plus-Gym-Management-System-V/gym-backend
 
+# Check if PM2 is installed
+if ! command -v pm2 &> /dev/null; then
+    echo "📦 PM2 not found. Installing..."
+    sudo npm install -g pm2
+fi
+
 echo "🔨 Building backend..."
 npm run build
 
