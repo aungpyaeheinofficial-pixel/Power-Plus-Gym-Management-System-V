@@ -41,7 +41,14 @@ export const POS: React.FC = () => {
   };
 
   const removeFromCart = (id: string, type: 'Product' | 'Membership') => {
-    setCart(prev => prev.filter(i => !(i.item.id === id && i.type === type)));
+    setCart(prev => {
+      const newCart = prev.filter(i => !(i.item.id === id && i.type === type));
+      // Hide cart if empty
+      if (newCart.length === 0) {
+        setShowCart(false);
+      }
+      return newCart;
+    });
   };
 
   const updateQuantity = (id: string, type: 'Product' | 'Membership', delta: number) => {
