@@ -252,10 +252,19 @@ app.get('/api/products', async (_req, res) => {
 app.post('/api/products', async (req, res) => {
   try {
     const { name_en, name_mm, category_id, sku, price, cost_price, stock, low_stock_threshold, unit, image, is_active } = req.body;
+    
+    // Validate category_id - must not be null
+    if (!category_id) {
+      return res.status(400).json({ error: 'category_id is required' });
+    }
+    
+    // Truncate image URL if too long (MySQL VARCHAR limit, typically 255)
+    const safeImage = image ? (image.length > 255 ? image.substring(0, 255) : image) : null;
+    
     const [result]: any = await pool.execute(
       `INSERT INTO products (name_en, name_mm, category_id, sku, price, cost_price, stock, low_stock_threshold, unit, image, is_active)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name_en, name_mm, category_id, sku || null, price, cost_price || 0, stock || 0, low_stock_threshold || 10, unit || 'pcs', image || null, is_active !== undefined ? is_active : 1]
+      [name_en, name_mm, category_id, sku || null, price, cost_price || 0, stock || 0, low_stock_threshold || 10, unit || 'pcs', safeImage, is_active !== undefined ? is_active : 1]
     );
     res.status(201).json({ id: result.insertId });
   } catch (error: any) {
@@ -480,9 +489,14 @@ app.put('/api/staff/:id', async (req, res) => {
     const { id } = req.params;
     const { name, role, phone, email, salary, photo_url, status, weeklySchedule } = req.body;
     
+    // Convert undefined to null for SQL
+    const safeEmail = email !== undefined ? email : null;
+    const safeSalary = salary !== undefined ? salary : null;
+    const safePhotoUrl = photo_url !== undefined ? photo_url : null;
+    
     await conn.execute(
       `UPDATE staff SET name = ?, role = ?, phone = ?, email = ?, salary = ?, photo_url = ?, status = ? WHERE id = ?`,
-      [name, role, phone, email || null, salary || null, photo_url || null, status, id]
+      [name, role, phone, safeEmail, safeSalary, safePhotoUrl, status, id]
     );
     
     // Update weekly schedule
@@ -552,9 +566,11 @@ app.get('/api/staff-attendance', async (req, res) => {
 app.post('/api/staff-attendance/clock-in', async (req, res) => {
   try {
     const { staff_id, date, clock_in, status } = req.body;
+    const mysqlDate = toMySQLDateTime(date) || toMySQLDateTime(new Date().toISOString());
+    const mysqlClockIn = toMySQLDateTime(clock_in) || toMySQLDateTime(new Date().toISOString());
     const [result]: any = await pool.execute(
       'INSERT INTO staff_attendance (staff_id, date, clock_in, status) VALUES (?, ?, ?, ?)',
-      [staff_id, date, clock_in, status || 'Working']
+      [staff_id, mysqlDate, mysqlClockIn, status || 'Working']
     );
     res.status(201).json({ id: result.insertId });
   } catch (error: any) {
@@ -566,9 +582,10 @@ app.put('/api/staff-attendance/clock-out/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { clock_out, hours_worked, total_duration, status } = req.body;
+    const mysqlClockOut = toMySQLDateTime(clock_out) || toMySQLDateTime(new Date().toISOString());
     await pool.execute(
       'UPDATE staff_attendance SET clock_out = ?, hours_worked = ?, total_duration = ?, status = ? WHERE id = ?',
-      [clock_out, hours_worked, total_duration, status || 'Completed', id]
+      [mysqlClockOut, hours_worked || null, total_duration || null, status || 'Completed', id]
     );
     res.json({ success: true });
   } catch (error: any) {
