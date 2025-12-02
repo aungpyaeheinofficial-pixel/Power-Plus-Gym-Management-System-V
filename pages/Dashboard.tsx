@@ -244,7 +244,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Chart Section */}
-          <div className="lg:col-span-2 premium-card p-8 rounded-3xl flex flex-col shadow-sm border-brand-border">
+          <div className="lg:col-span-2 premium-card p-8 rounded-3xl flex flex-col shadow-sm border-brand-border overflow-hidden">
               <div className="flex justify-between items-center mb-8">
                   <h3 className="text-xl font-bold text-white flex items-center gap-3 uppercase tracking-wide">
                       <div className="bg-brand-yellow h-8 w-1"></div>
@@ -255,7 +255,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                       <option>Last 30 Days</option>
                   </select>
               </div>
-              <div className="flex-1 h-[350px] w-full">
+              <div className="flex-1 w-full min-h-0" style={{ height: '350px', maxHeight: '350px' }}>
                   <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={stats.chartData}>
                           <defs>
@@ -334,7 +334,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                           />
                       </AreaChart>
                   </ResponsiveContainer>
-                  <div className="flex gap-4 text-xs mt-4 justify-center">
+                  <div className="flex gap-4 text-xs mt-4 justify-center flex-shrink-0">
                       <div className="flex items-center gap-2 text-gray-400"><span className="w-2 h-2 rounded-full bg-blue-500"></span> Membership</div>
                       <div className="flex items-center gap-2 text-gray-400"><span className="w-2 h-2 rounded-full bg-green-500"></span> Product Sales</div>
                       <div className="flex items-center gap-2 text-gray-400"><span className="w-2 h-2 rounded-full bg-yellow-500"></span> Total Revenue</div>
