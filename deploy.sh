@@ -1,48 +1,51 @@
 #!/bin/bash
 
-# DigitalOcean Deployment Script
-# Run this from your local machine to deploy to droplet
+# 1. Go to project folder
+echo "📂 Moving to project folder..."
+cd /var/www/html/Power-Plus-Gym-Management-System-V
 
-DROPLET_IP="YOUR_DROPLET_IP"
-DROPLET_USER="root"
-BACKEND_DIR="gym-backend"
-FRONTEND_DIR="."
+# 2. Get latest code
+echo "⬇️ Pulling from GitHub..."
+git pull origin main  # Change 'main' to 'master' if needed
 
-echo "🚀 Starting deployment to DigitalOcean..."
+# 3. Create .env file with correct API URL (CRITICAL!)
+echo "📝 Creating .env file with correct API URL..."
+cat > .env << 'EOF'
+VITE_API_URL=http://167.172.90.182:4000/api
+EOF
+echo "✅ .env file created:"
+cat .env
 
-# Step 1: Build backend
-echo "📦 Building backend..."
-cd $BACKEND_DIR
+# 4. Install dependencies (in case you added new packages)
+echo "📦 Installing dependencies..."
 npm install
-npm run build
-cd ..
 
-# Step 2: Upload backend
-echo "📤 Uploading backend to droplet..."
-scp -r $BACKEND_DIR/dist $DROPLET_USER@$DROPLET_IP:/var/www/gym-backend/
-scp $BACKEND_DIR/package.json $DROPLET_USER@$DROPLET_IP:/var/www/gym-backend/
-scp $BACKEND_DIR/.env $DROPLET_USER@$DROPLET_IP:/var/www/gym-backend/ 2>/dev/null || echo "⚠️  .env file not found, create it manually on server"
-
-# Step 3: Build frontend
-echo "📦 Building frontend..."
-npm install
+# 5. Build the project (this will use the .env file we just created)
+echo "🔨 Building project with correct API URL..."
 npm run build
 
-# Step 4: Upload frontend
-echo "📤 Uploading frontend to droplet..."
-scp -r dist $DROPLET_USER@$DROPLET_IP:/var/www/gym-frontend/
+# 6. Verify build doesn't contain localhost
+echo "🔍 Verifying build..."
+if grep -r "localhost:4000" dist/ 2>/dev/null | head -1; then
+    echo "⚠️  WARNING: Build still contains 'localhost:4000'!"
+    echo "   This might be in source maps or comments. Checking..."
+else
+    echo "✅ Build verified (no localhost:4000 found)"
+fi
 
-# Step 5: Restart services on droplet
-echo "🔄 Restarting services on droplet..."
-ssh $DROPLET_USER@$DROPLET_IP << 'ENDSSH'
-cd /var/www/gym-backend
-npm install --production
-pm2 restart gym-api || pm2 start dist/server.js --name gym-api
-pm2 save
-sudo systemctl restart nginx
-ENDSSH
+# 7. Move files to NGINX folder
+echo "🚀 Deploying to Port 3000..."
+rm -rf /var/www/app3000/*
+cp -r dist/* /var/www/app3000/
 
-echo "✅ Deployment complete!"
-echo "🌐 Visit: http://$DROPLET_IP"
-echo "🔍 Check API: http://$DROPLET_IP/api/health"
+# 8. Reload Nginx to serve new files
+echo "🔄 Reloading Nginx..."
+sudo systemctl reload nginx
 
+echo ""
+echo "✅✅✅ Deployment Complete! ✅✅✅"
+echo ""
+echo "📋 IMPORTANT: Clear browser cache or use Incognito mode!"
+echo "   Frontend: http://167.172.90.182:3000"
+echo "   API: http://167.172.90.182:4000/api"
+echo ""
