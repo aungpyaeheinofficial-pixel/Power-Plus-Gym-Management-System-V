@@ -129,7 +129,7 @@ export const POS: React.FC = () => {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar min-h-0">
             {activeTab === 'Products' ? (
                 <>
                     {/* Categories */}
