@@ -276,9 +276,18 @@ app.put('/api/products/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { name_en, name_mm, category_id, sku, price, cost_price, stock, low_stock_threshold, unit, image, is_active } = req.body;
+    
+    // Validate category_id - must not be null
+    if (!category_id) {
+      return res.status(400).json({ error: 'category_id is required' });
+    }
+    
+    // Truncate image URL if too long
+    const safeImage = image ? (image.length > 255 ? image.substring(0, 255) : image) : null;
+    
     await pool.execute(
       `UPDATE products SET name_en = ?, name_mm = ?, category_id = ?, sku = ?, price = ?, cost_price = ?, stock = ?, low_stock_threshold = ?, unit = ?, image = ?, is_active = ? WHERE id = ?`,
-      [name_en, name_mm, category_id, sku || null, price, cost_price || 0, stock, low_stock_threshold || 10, unit || 'pcs', image || null, is_active, id]
+      [name_en, name_mm, category_id, sku || null, price, cost_price || 0, stock || 0, low_stock_threshold || 10, unit || 'pcs', safeImage, is_active, id]
     );
     res.json({ success: true });
   } catch (error: any) {
