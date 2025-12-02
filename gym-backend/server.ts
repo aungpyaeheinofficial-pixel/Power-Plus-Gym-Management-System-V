@@ -4,10 +4,25 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import { pool } from './db';
 
-// Get __dirname for CommonJS (TypeScript compiles to CommonJS)
-const __dirname = path.resolve();
+// Calculate path to frontend dist folder
+// When running from gym-backend/dist/server.js:
+// - process.cwd() is usually the project root when run via PM2
+// - But to be safe, we'll use an absolute path from the current file location
+// Since TypeScript compiles to CommonJS, we can use require.main
+let distPath: string;
+try {
+  // Try to get the directory of the compiled file
+  // When compiled, this file is at gym-backend/dist/server.js
+  // So we go up two levels to get to project root, then into dist
+  const currentDir = __dirname || path.dirname(require.main?.filename || '');
+  distPath = path.resolve(currentDir, '../..', 'dist');
+} catch {
+  // Fallback: assume dist is in project root relative to cwd
+  distPath = path.resolve(process.cwd(), 'dist');
+}
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '4000', 10);
@@ -20,9 +35,18 @@ app.use(express.json({ limit: '10mb' })); // Increase limit for large base64 ima
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Serve static files from dist folder (for Capacitor auto-updates)
-// dist folder is in the parent directory (project root)
-const distPath = path.join(process.cwd(), '../dist');
-app.use(express.static(distPath));
+// Only serve if dist folder exists (optional, won't crash if missing)
+try {
+  const resolvedDistPath = path.resolve(distPath);
+  if (fs.existsSync(resolvedDistPath)) {
+    app.use(express.static(resolvedDistPath));
+    console.log(`📱 Serving frontend from: ${resolvedDistPath}`);
+  } else {
+    console.log(`⚠️  Frontend dist folder not found at: ${resolvedDistPath} (this is OK if frontend is served separately)`);
+  }
+} catch (error: any) {
+  console.log(`⚠️  Could not set up static file serving: ${error?.message || error}`);
+}
 
 // Helper function to convert ISO 8601 date to MySQL datetime format
 function toMySQLDateTime(dateStr: string | null | undefined): string | null {
@@ -794,6 +818,5 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`📊 Database: power_plus_gym`);
   console.log(`🌐 API Base URL: http://0.0.0.0:${PORT}/api`);
   console.log(`🌐 External URL: http://167.172.90.182:${PORT}/api`);
-  console.log(`📱 Serving frontend from: ${distPath}`);
 });
 
