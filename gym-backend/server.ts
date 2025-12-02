@@ -20,7 +20,8 @@ app.use(express.json({ limit: '10mb' })); // Increase limit for large base64 ima
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Serve static files from dist folder (for Capacitor auto-updates)
-const distPath = path.join(__dirname, '../dist');
+// dist folder is in the parent directory (project root)
+const distPath = path.join(process.cwd(), '../dist');
 app.use(express.static(distPath));
 
 // Helper function to convert ISO 8601 date to MySQL datetime format
