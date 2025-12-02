@@ -93,7 +93,7 @@ export const POS: React.FC = () => {
   return (
     <div className="flex flex-col lg:flex-row h-full gap-6 overflow-y-auto lg:overflow-hidden">
       {/* Left Side - Catalog */}
-      <div className="flex-1 flex flex-col min-h-0 bg-dark-900/50 backdrop-blur border border-white/5 rounded-2xl overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-0 bg-dark-900/50 backdrop-blur border border-white/5 rounded-2xl overflow-visible lg:overflow-hidden">
         {/* Top Bar - Fixed on mobile, sticky on desktop */}
         <div className="fixed top-20 left-0 right-0 lg:relative lg:top-0 bg-dark-900 backdrop-blur-md p-3 sm:p-4 border-b-2 border-gold-500/30 space-y-3 sm:space-y-4 shadow-2xl z-50 lg:sticky lg:z-50">
             <div className="flex gap-2 sm:gap-4">
@@ -143,7 +143,7 @@ export const POS: React.FC = () => {
         </div>
 
         {/* Content - Add padding top on mobile to account for fixed tabs */}
-        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar min-h-0 pt-24 lg:pt-4" style={{ maxHeight: 'calc(100vh - 300px)' }}>
+        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar min-h-0 pt-32 lg:pt-4" style={{ minHeight: '400px' }}>
             {activeTab === 'Products' ? (
                 <>
                     {/* Categories */}
