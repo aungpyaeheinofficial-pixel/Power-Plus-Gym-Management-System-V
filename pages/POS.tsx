@@ -91,23 +91,37 @@ export const POS: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row h-full gap-6 overflow-hidden -mt-4 lg:mt-0">
+    <div className="flex flex-col lg:flex-row h-full gap-6 overflow-hidden">
       {/* Left Side - Catalog */}
       <div className="flex-1 flex flex-col min-h-0 bg-dark-900/50 backdrop-blur border border-white/5 rounded-2xl overflow-hidden">
-        {/* Top Bar - Sticky on mobile, positioned below header */}
-        <div className="sticky top-0 z-30 bg-dark-900/98 backdrop-blur-md p-3 sm:p-4 border-b border-white/10 space-y-3 sm:space-y-4 shadow-xl">
+        {/* Top Bar - Always visible, sticky on scroll */}
+        <div className="sticky top-0 z-50 bg-dark-900 backdrop-blur-md p-3 sm:p-4 border-b-2 border-gold-500/30 space-y-3 sm:space-y-4 shadow-2xl">
             <div className="flex gap-2 sm:gap-4">
                 <button 
-                    onClick={() => setActiveTab('Products')}
-                    className={`flex-1 py-3 sm:py-3 px-2 sm:px-4 rounded-xl font-bold text-sm sm:text-base transition-all touch-manipulation ${activeTab === 'Products' ? 'bg-gold-500 text-black shadow-lg shadow-gold-500/20' : 'bg-white/10 text-gray-300 hover:bg-white/20 hover:text-white'}`}
+                    onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setActiveTab('Products');
+                    }}
+                    className={`flex-1 py-3 sm:py-3 px-2 sm:px-4 rounded-xl font-bold text-sm sm:text-base transition-all touch-manipulation active:scale-95 ${activeTab === 'Products' ? 'bg-gold-500 text-black shadow-lg shadow-gold-500/30 ring-2 ring-gold-500/50' : 'bg-white/15 text-white hover:bg-white/25 border border-white/20'}`}
                 >
-                    Products
+                    <span className="flex items-center justify-center gap-2">
+                        <Package size={16} className="sm:hidden" />
+                        Products
+                    </span>
                 </button>
                 <button 
-                    onClick={() => setActiveTab('Membership')}
-                    className={`flex-1 py-3 sm:py-3 px-2 sm:px-4 rounded-xl font-bold text-sm sm:text-base transition-all touch-manipulation ${activeTab === 'Membership' ? 'bg-gold-500 text-black shadow-lg shadow-gold-500/20' : 'bg-white/10 text-gray-300 hover:bg-white/20 hover:text-white'}`}
+                    onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setActiveTab('Membership');
+                    }}
+                    className={`flex-1 py-3 sm:py-3 px-2 sm:px-4 rounded-xl font-bold text-sm sm:text-base transition-all touch-manipulation active:scale-95 ${activeTab === 'Membership' ? 'bg-gold-500 text-black shadow-lg shadow-gold-500/30 ring-2 ring-gold-500/50' : 'bg-white/15 text-white hover:bg-white/25 border border-white/20'}`}
                 >
-                    Membership
+                    <span className="flex items-center justify-center gap-2">
+                        <Tag size={16} className="sm:hidden" />
+                        Membership
+                    </span>
                 </button>
             </div>
 
