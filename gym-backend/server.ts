@@ -550,7 +550,7 @@ app.put('/api/staff/:id', async (req, res) => {
           await conn.execute(
             `INSERT INTO staff_weekly_schedule (staff_id, weekday, working, start, end, shift)
              VALUES (?, ?, ?, ?, ?, ?)`,
-            [id, day, daySchedule.working ? 1 : 0, daySchedule.start || null, daySchedule.end || null, daySchedule.shift || 'Off']
+            [id, day, daySchedule.working ? 1 : 0, daySchedule.start || '', daySchedule.end || '', daySchedule.shift || 'Off']
           );
         }
       }
