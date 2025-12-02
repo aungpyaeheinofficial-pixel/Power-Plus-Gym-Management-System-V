@@ -804,7 +804,8 @@ app.get('/api/health', (_req, res) => {
 });
 
 // SPA fallback - serve index.html for all non-API routes
-app.get('*', (req, res, next) => {
+// Use app.use() with a function to catch all routes (Express 5 compatible)
+app.use((req, res, next) => {
   // Skip API routes
   if (req.path.startsWith('/api')) {
     return next();
