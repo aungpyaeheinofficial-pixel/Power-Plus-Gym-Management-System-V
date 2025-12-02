@@ -10,7 +10,7 @@ import { pool } from './db';
 const __dirname = path.resolve();
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = parseInt(process.env.PORT || '4000', 10);
 
 // Trust proxy for DigitalOcean/nginx
 app.set('trust proxy', true);
