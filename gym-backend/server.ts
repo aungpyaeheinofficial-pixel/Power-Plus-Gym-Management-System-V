@@ -14,6 +14,33 @@ app.set('trust proxy', true);
 app.use(cors());
 app.use(express.json());
 
+// Helper function to convert ISO 8601 date to MySQL datetime format
+function toMySQLDateTime(dateStr: string | null | undefined): string | null {
+  if (!dateStr) return null;
+  try {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return null;
+    // Format: YYYY-MM-DD HH:MM:SS
+    return date.toISOString().slice(0, 19).replace('T', ' ');
+  } catch {
+    return null;
+  }
+}
+
+// Helper function to validate and convert membership_type_id
+async function validateMembershipType(membershipTypeId: string | number | null | undefined): Promise<number | null> {
+  if (!membershipTypeId) return null;
+  const id = typeof membershipTypeId === 'string' ? parseInt(membershipTypeId) : membershipTypeId;
+  if (isNaN(id)) return null;
+  
+  try {
+    const [rows]: any = await pool.query('SELECT id FROM membership_types WHERE id = ?', [id]);
+    return rows.length > 0 ? id : null;
+  } catch {
+    return null;
+  }
+}
+
 // ==================== USERS ====================
 app.get('/api/users', async (_req, res) => {
   try {
@@ -153,10 +180,20 @@ app.get('/api/members', async (_req, res) => {
 app.post('/api/members', async (req, res) => {
   try {
     const { member_code, full_name_en, full_name_mm, phone, email, gender, membership_type_id, start_date, end_date, status, join_date, photo_url, address, emergency_name, emergency_phone, nrc, dob, notes } = req.body;
+    
+    // Validate and convert membership_type_id
+    const validMembershipTypeId = await validateMembershipType(membership_type_id);
+    
+    // Convert dates to MySQL format
+    const mysqlStartDate = toMySQLDateTime(start_date);
+    const mysqlEndDate = toMySQLDateTime(end_date);
+    const mysqlJoinDate = toMySQLDateTime(join_date) || toMySQLDateTime(new Date().toISOString());
+    const mysqlDob = toMySQLDateTime(dob);
+    
     const [result]: any = await pool.execute(
       `INSERT INTO members (member_code, full_name_en, full_name_mm, phone, email, gender, membership_type_id, start_date, end_date, status, join_date, photo_url, address, emergency_name, emergency_phone, nrc, dob, notes)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [member_code, full_name_en, full_name_mm || null, phone, email || null, gender, membership_type_id || null, start_date || null, end_date || null, status || 'Active', join_date, photo_url || null, address || null, emergency_name || null, emergency_phone || null, nrc || null, dob || null, notes || null]
+      [member_code, full_name_en, full_name_mm || null, phone, email || null, gender, validMembershipTypeId, mysqlStartDate, mysqlEndDate, status || 'Active', mysqlJoinDate, photo_url || null, address || null, emergency_name || null, emergency_phone || null, nrc || null, mysqlDob, notes || null]
     );
     res.status(201).json({ id: result.insertId });
   } catch (error: any) {
@@ -262,9 +299,11 @@ app.get('/api/check-ins', async (req, res) => {
 app.post('/api/check-ins', async (req, res) => {
   try {
     const { member_id, check_in_time, check_out_time, method } = req.body;
+    const mysqlCheckInTime = toMySQLDateTime(check_in_time) || toMySQLDateTime(new Date().toISOString());
+    const mysqlCheckOutTime = toMySQLDateTime(check_out_time);
     const [result]: any = await pool.execute(
       'INSERT INTO check_ins (member_id, check_in_time, check_out_time, method) VALUES (?, ?, ?, ?)',
-      [member_id, check_in_time, check_out_time || null, method || 'Manual']
+      [member_id, mysqlCheckInTime, mysqlCheckOutTime, method || 'Manual']
     );
     res.status(201).json({ id: result.insertId });
   } catch (error: any) {
@@ -313,11 +352,14 @@ app.post('/api/transactions', async (req, res) => {
     await conn.beginTransaction();
     const { invoice_number, member_id, member_name, type, subtotal, discount, total, payment_method, date, processed_by, items } = req.body;
     
+    // Convert date to MySQL format
+    const mysqlDate = toMySQLDateTime(date) || toMySQLDateTime(new Date().toISOString());
+    
     // Insert transaction
     const [txnResult]: any = await conn.execute(
       `INSERT INTO transactions (invoice_number, member_id, member_name, type, subtotal, discount, total, payment_method, date, processed_by)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [invoice_number, member_id || null, member_name || null, type, subtotal, discount || 0, total, payment_method, date, processed_by || null]
+      [invoice_number, member_id || null, member_name || null, type, subtotal, discount || 0, total, payment_method, mysqlDate, processed_by || null]
     );
     
     const txnId = txnResult.insertId;
@@ -387,10 +429,12 @@ app.post('/api/staff', async (req, res) => {
     await conn.beginTransaction();
     const { staff_code, name, role, phone, email, join_date, salary, photo_url, status, weeklySchedule } = req.body;
     
+    const mysqlJoinDate = toMySQLDateTime(join_date) || toMySQLDateTime(new Date().toISOString());
+    
     const [result]: any = await conn.execute(
       `INSERT INTO staff (staff_code, name, role, phone, email, join_date, salary, photo_url, status)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [staff_code, name, role, phone, email || null, join_date, salary || null, photo_url || null, status || 'Active']
+      [staff_code, name, role, phone, email || null, mysqlJoinDate, salary || null, photo_url || null, status || 'Active']
     );
     
     const staffId = result.insertId;
