@@ -809,8 +809,17 @@ app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api')) {
     return next();
   }
-  // Serve index.html for SPA routing
-  res.sendFile(path.join(distPath, 'index.html'));
+  // Serve index.html for SPA routing (only if dist folder exists)
+  try {
+    const indexPath = path.join(distPath, 'index.html');
+    if (fs.existsSync(indexPath)) {
+      res.sendFile(path.resolve(indexPath));
+    } else {
+      res.status(404).json({ error: 'Frontend not found. Please build the frontend first.' });
+    }
+  } catch (error: any) {
+    res.status(500).json({ error: 'Error serving frontend', message: error?.message });
+  }
 });
 
 app.listen(PORT, '0.0.0.0', () => {
