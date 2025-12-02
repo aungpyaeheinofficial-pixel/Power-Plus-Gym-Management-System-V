@@ -1,4 +1,16 @@
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+// Determine API URL based on platform
+import { Capacitor } from '@capacitor/core';
+
+const getApiBase = () => {
+  if (Capacitor.isNativePlatform()) {
+    // For Android app, use your production API
+    return 'http://167.172.90.182:4000/api';
+  }
+  // For web, use environment variable
+  return import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+};
+
+const API_BASE = getApiBase();
 
 async function fetchAPI(endpoint: string, options?: RequestInit) {
   const response = await fetch(`${API_BASE}${endpoint}`, {

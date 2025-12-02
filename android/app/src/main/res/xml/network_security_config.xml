@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Allow HTTP traffic for your API server -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">167.172.90.182</domain>
+        <domain includeSubdomains="true">localhost</domain>
+        <domain includeSubdomains="true">127.0.0.1</domain>
+        <domain includeSubdomains="true">10.0.2.2</domain>
+    </domain-config>
+    <!-- For production, you should use HTTPS -->
+    <!-- Remove this config and use HTTPS instead -->
+</network-security-config>
+

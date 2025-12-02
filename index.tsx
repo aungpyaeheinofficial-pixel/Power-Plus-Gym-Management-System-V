@@ -1,6 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import { initMobileApp } from './utils/mobileUtils';
+
+// Initialize mobile features
+initMobileApp().catch(console.error);
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
