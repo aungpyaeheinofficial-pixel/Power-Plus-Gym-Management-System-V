@@ -205,9 +205,18 @@ app.put('/api/members/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { full_name_en, full_name_mm, phone, email, gender, membership_type_id, start_date, end_date, status, photo_url, address, emergency_name, emergency_phone, nrc, dob, notes } = req.body;
+    
+    // Validate and convert membership_type_id
+    const validMembershipTypeId = await validateMembershipType(membership_type_id);
+    
+    // Convert dates to MySQL format
+    const mysqlStartDate = toMySQLDateTime(start_date);
+    const mysqlEndDate = toMySQLDateTime(end_date);
+    const mysqlDob = toMySQLDateTime(dob);
+    
     await pool.execute(
       `UPDATE members SET full_name_en = ?, full_name_mm = ?, phone = ?, email = ?, gender = ?, membership_type_id = ?, start_date = ?, end_date = ?, status = ?, photo_url = ?, address = ?, emergency_name = ?, emergency_phone = ?, nrc = ?, dob = ?, notes = ? WHERE id = ?`,
-      [full_name_en, full_name_mm || null, phone, email || null, gender, membership_type_id || null, start_date || null, end_date || null, status, photo_url || null, address || null, emergency_name || null, emergency_phone || null, nrc || null, dob || null, notes || null, id]
+      [full_name_en, full_name_mm || null, phone, email || null, gender, validMembershipTypeId, mysqlStartDate, mysqlEndDate, status, photo_url || null, address || null, emergency_name || null, emergency_phone || null, nrc || null, mysqlDob, notes || null, id]
     );
     res.json({ success: true });
   } catch (error: any) {
