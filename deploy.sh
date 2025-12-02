@@ -8,13 +8,18 @@ cd /var/www/html/Power-Plus-Gym-Management-System-V
 echo "⬇️ Pulling from GitHub..."
 git pull origin main  # Change 'main' to 'master' if needed
 
-# 3. Create .env file with correct API URL (CRITICAL!)
-echo "📝 Creating .env file with correct API URL..."
+# 3. Create .env.production file with correct API URL (CRITICAL!)
+# Vite uses .env.production for production builds, not .env
+echo "📝 Creating .env.production file with correct API URL..."
+cat > .env.production << 'EOF'
+VITE_API_URL=http://167.172.90.182:4000/api
+EOF
+# Also create .env for development
 cat > .env << 'EOF'
 VITE_API_URL=http://167.172.90.182:4000/api
 EOF
-echo "✅ .env file created:"
-cat .env
+echo "✅ .env.production file created:"
+cat .env.production
 
 # 4. Install dependencies (in case you added new packages)
 echo "📦 Installing dependencies..."
