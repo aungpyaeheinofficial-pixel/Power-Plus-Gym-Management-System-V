@@ -312,13 +312,10 @@ app.post('/api/products', async (req, res) => {
       return res.status(400).json({ error: 'category_id is required' });
     }
     
-    // Truncate image URL if too long (MySQL VARCHAR limit, typically 255)
-    const safeImage = image ? (image.length > 255 ? image.substring(0, 255) : image) : null;
-    
     const [result]: any = await pool.execute(
       `INSERT INTO products (name_en, name_mm, category_id, sku, price, cost_price, stock, low_stock_threshold, unit, image, is_active)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [name_en, name_mm, category_id, sku || null, price, cost_price || 0, stock || 0, low_stock_threshold || 10, unit || 'pcs', safeImage, is_active !== undefined ? is_active : 1]
+      [name_en, name_mm, category_id, sku || null, price, cost_price || 0, stock || 0, low_stock_threshold || 10, unit || 'pcs', image || null, is_active !== undefined ? is_active : 1]
     );
     res.status(201).json({ id: result.insertId });
   } catch (error: any) {
@@ -376,10 +373,8 @@ app.put('/api/products/:id', async (req, res) => {
       values.push(unit || 'pcs');
     }
     if (image !== undefined) {
-      // Truncate image URL if too long
-      const safeImage = image ? (image.length > 255 ? image.substring(0, 255) : image) : null;
       updates.push('image = ?');
-      values.push(safeImage);
+      values.push(image || null);
     }
     if (is_active !== undefined) {
       updates.push('is_active = ?');
