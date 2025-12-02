@@ -3,8 +3,9 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { TRANSLATIONS, MOCK_MEMBERSHIP_TYPES } from '../constants';
-import { ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, Search, ScanLine, Tag, Receipt } from 'lucide-react';
+import { ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, Search, ScanLine, Tag, Receipt, Package } from 'lucide-react';
 import { Product, Transaction, TransactionItem, MembershipType } from '../types';
+import { getSafeImageSrc, handleImageError } from '../utils/imageUtils';
 
 export const POS: React.FC = () => {
   const { products, productCategories, addTransaction, members, language } = useApp();

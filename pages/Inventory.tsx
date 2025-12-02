@@ -4,6 +4,7 @@ import React, { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { Search, Plus, Camera, Edit, Trash2, Package, Image as ImageIcon, X, Check, Filter, LayoutGrid, List, AlertTriangle, FolderCog, FolderOpen } from 'lucide-react';
 import { Product, ProductCategory } from '../types';
+import { getSafeImageSrc, handleImageError } from '../utils/imageUtils';
 
 export const Inventory: React.FC = () => {
   const { products, addProduct, updateProduct, deleteProduct, productCategories, addProductCategory, updateProductCategory, deleteProductCategory } = useApp();
