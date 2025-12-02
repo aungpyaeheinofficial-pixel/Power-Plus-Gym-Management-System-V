@@ -498,15 +498,47 @@ app.put('/api/staff/:id', async (req, res) => {
     const { id } = req.params;
     const { name, role, phone, email, salary, photo_url, status, weeklySchedule } = req.body;
     
-    // Convert undefined to null for SQL
-    const safeEmail = email !== undefined ? email : null;
-    const safeSalary = salary !== undefined ? salary : null;
-    const safePhotoUrl = photo_url !== undefined ? photo_url : null;
+    // Build dynamic UPDATE query only for provided fields
+    const updates: string[] = [];
+    const values: any[] = [];
     
-    await conn.execute(
-      `UPDATE staff SET name = ?, role = ?, phone = ?, email = ?, salary = ?, photo_url = ?, status = ? WHERE id = ?`,
-      [name, role, phone, safeEmail, safeSalary, safePhotoUrl, status, id]
-    );
+    if (name !== undefined) {
+      updates.push('name = ?');
+      values.push(name);
+    }
+    if (role !== undefined) {
+      updates.push('role = ?');
+      values.push(role);
+    }
+    if (phone !== undefined) {
+      updates.push('phone = ?');
+      values.push(phone);
+    }
+    if (email !== undefined) {
+      updates.push('email = ?');
+      values.push(email || null);
+    }
+    if (salary !== undefined) {
+      updates.push('salary = ?');
+      values.push(salary !== null && salary !== undefined ? salary : null);
+    }
+    if (photo_url !== undefined) {
+      updates.push('photo_url = ?');
+      values.push(photo_url || null);
+    }
+    if (status !== undefined) {
+      updates.push('status = ?');
+      values.push(status);
+    }
+    
+    // Only update staff table if there are fields to update
+    if (updates.length > 0) {
+      values.push(id);
+      await conn.execute(
+        `UPDATE staff SET ${updates.join(', ')} WHERE id = ?`,
+        values
+      );
+    }
     
     // Update weekly schedule
     if (weeklySchedule) {
@@ -518,7 +550,7 @@ app.put('/api/staff/:id', async (req, res) => {
           await conn.execute(
             `INSERT INTO staff_weekly_schedule (staff_id, weekday, working, start, end, shift)
              VALUES (?, ?, ?, ?, ?, ?)`,
-            [id, day, daySchedule.working ? 1 : 0, daySchedule.start || '', daySchedule.end || '', daySchedule.shift || 'Off']
+            [id, day, daySchedule.working ? 1 : 0, daySchedule.start || null, daySchedule.end || null, daySchedule.shift || 'Off']
           );
         }
       }
