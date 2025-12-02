@@ -82,7 +82,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
         {/* Bottom Section */}
         <div className="p-4 border-t border-brand-border bg-brand-surface/30">
            <button 
-             onClick={() => onNavigate('settings')} 
+             onClick={() => {
+               onNavigate('settings');
+               setIsMobileMenuOpen(false);
+             }} 
              className={`flex items-center gap-4 px-4 py-3 text-gray-400 hover:text-white hover:bg-brand-surface rounded-xl w-full transition-colors font-medium ${currentPage === 'settings' ? 'bg-brand-surface text-white' : ''}`}
            >
               <Settings size={22} />
