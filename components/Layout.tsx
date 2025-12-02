@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { getSafeImageSrc, handleImageError } from '../utils/imageUtils';
 import { TRANSLATIONS } from '../constants';
@@ -20,6 +20,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
   const t = TRANSLATIONS[language];
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Close sidebar when page changes on mobile/tablet
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      setIsMobileMenuOpen(false);
+    }
+  }, [currentPage]);
+
   const menuItems = [
     { id: 'dashboard', icon: LayoutDashboard, label: t.dashboard },
     { id: 'members', icon: Users, label: t.members },
@@ -32,6 +39,14 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
 
   return (
     <div className="flex h-screen w-full font-sans overflow-hidden transition-colors duration-300 bg-brand-black text-brand-text">
+      {/* Backdrop overlay for mobile */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <aside className={`
         fixed inset-y-0 left-0 z-50 w-72 backdrop-blur-xl border-r transform transition-transform duration-300 ease-in-out
@@ -61,11 +76,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
              return (
                <button
                  key={item.id}
-                 onClick={() => {
+                 onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     onNavigate(item.id);
                     setIsMobileMenuOpen(false);
                  }}
-                 className={`w-full flex items-center gap-4 px-4 py-4 rounded-xl transition-all duration-200 group relative overflow-hidden font-bold
+                 className={`w-full flex items-center gap-4 px-4 py-4 rounded-xl transition-all duration-200 group relative overflow-hidden font-bold touch-manipulation active:scale-95
                   ${isActive 
                     ? 'bg-gradient-to-r from-brand-yellow to-brand-highlight text-black shadow-[0_4px_16px_rgba(255,235,59,0.25)]' 
                     : 'text-gray-400 hover:bg-brand-surface hover:text-brand-yellow'}
@@ -80,18 +97,28 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
         </nav>
 
         {/* Bottom Section */}
-        <div className="p-4 border-t border-brand-border bg-brand-surface/30">
+        <div className="p-4 border-t border-brand-border bg-brand-surface/30 mt-auto">
            <button 
-             onClick={() => {
+             onClick={(e) => {
+               e.preventDefault();
+               e.stopPropagation();
                onNavigate('settings');
                setIsMobileMenuOpen(false);
              }} 
-             className={`flex items-center gap-4 px-4 py-3 text-gray-400 hover:text-white hover:bg-brand-surface rounded-xl w-full transition-colors font-medium ${currentPage === 'settings' ? 'bg-brand-surface text-white' : ''}`}
+             className={`flex items-center gap-4 px-4 py-3 text-gray-400 hover:text-white hover:bg-brand-surface rounded-xl w-full transition-colors font-medium touch-manipulation active:scale-95 ${currentPage === 'settings' ? 'bg-brand-surface text-white' : ''}`}
            >
               <Settings size={22} />
               <span>{t.settings}</span>
            </button>
-           <button onClick={logout} className="flex items-center gap-4 px-4 py-3 text-red-500 hover:bg-red-900/10 rounded-xl w-full mt-1 transition-colors group font-bold">
+           <button 
+             onClick={(e) => {
+               e.preventDefault();
+               e.stopPropagation();
+               logout();
+               setIsMobileMenuOpen(false);
+             }} 
+             className="flex items-center gap-4 px-4 py-3 text-red-500 hover:bg-red-900/10 rounded-xl w-full mt-1 transition-colors group font-bold touch-manipulation active:scale-95"
+           >
               <LogOut size={22} className="group-hover:-translate-x-1 transition-transform" />
               <span>{t.logout}</span>
            </button>
