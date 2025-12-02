@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { TRANSLATIONS, MOCK_MEMBERSHIP_TYPES } from '../constants';
-import { ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, Search, ScanLine, Tag, Receipt, Package } from 'lucide-react';
+import { ShoppingCart, Trash2, Plus, Minus, CreditCard, Banknote, Search, ScanLine, Tag, Receipt, Package, X, ChevronRight } from 'lucide-react';
 import { Product, Transaction, TransactionItem, MembershipType } from '../types';
 import { getSafeImageSrc, handleImageError } from '../utils/imageUtils';
 
@@ -17,6 +17,7 @@ export const POS: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState<Transaction['paymentMethod']>('Cash');
   const [showReceipt, setShowReceipt] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showCart, setShowCart] = useState(false);
   
   // Membership specific state
   const [selectedMemberId, setSelectedMemberId] = useState('');
@@ -90,8 +91,10 @@ export const POS: React.FC = () => {
     setSelectedMemberId('');
   };
 
+  const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+
   return (
-    <div className="flex flex-col lg:flex-row h-full gap-6 overflow-y-auto lg:overflow-hidden">
+    <div className="flex flex-col lg:flex-row h-full gap-6 overflow-y-auto lg:overflow-hidden relative">
       {/* Left Side - Catalog */}
       <div className="flex-1 flex flex-col min-h-0 bg-dark-900/50 backdrop-blur border border-white/5 rounded-2xl overflow-visible lg:overflow-hidden">
         {/* Top Bar - Fixed on mobile, sticky on desktop */}
@@ -238,7 +241,15 @@ export const POS: React.FC = () => {
             <ShoppingCart className="text-gold-500" size={20} />
             <h3 className="font-bold text-white text-lg">Current Order</h3>
           </div>
-          <span className="bg-white/10 text-white text-xs px-2 py-1 rounded-full">{cart.reduce((a,b)=>a+b.quantity,0)} Items</span>
+          <div className="flex items-center gap-2">
+            <span className="bg-white/10 text-white text-xs px-2 py-1 rounded-full">{cartItemCount} Items</span>
+            <button
+              onClick={() => setShowCart(false)}
+              className="lg:hidden text-gray-400 hover:text-white p-1"
+            >
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
