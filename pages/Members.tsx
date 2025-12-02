@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { TRANSLATIONS, MOCK_MEMBERSHIP_TYPES } from '../constants';
 import { Search, UserPlus, Camera, Edit, Trash2, Phone, Calendar, User, X, Check, MapPin, Mail, CreditCard, CheckCircle, LayoutGrid, List } from 'lucide-react';
 import { Member } from '../types';
+import { getSafeImageSrc, handleImageError } from '../utils/imageUtils';
 
 export const Members: React.FC = () => {
   const { members, addMember, updateMember, deleteMember, addTransaction, language } = useApp();
