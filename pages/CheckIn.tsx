@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { TRANSLATIONS } from '../constants';
-import { Search, UserCheck, QrCode, Clock, CheckCircle, XCircle, AlertTriangle, Calendar } from 'lucide-react';
+import { Search, UserCheck, QrCode, Clock, CheckCircle, XCircle, AlertTriangle, Calendar, User } from 'lucide-react';
+import { getSafeImageSrc, handleImageError } from '../utils/imageUtils';
 import { Member } from '../types';
 
 export const CheckInPage: React.FC = () => {
@@ -90,7 +91,18 @@ export const CheckInPage: React.FC = () => {
                         <button onClick={() => setSelectedMember(null)} className="absolute top-4 right-4 text-gray-500 hover:text-white"><XCircle size={24}/></button>
                         
                         <div className="w-32 h-32 rounded-full p-1 bg-gradient-to-br from-gold-400 to-gold-600 mx-auto mb-4">
-                            <img src={selectedMember.photoUrl} className="w-full h-full rounded-full object-cover border-4 border-dark-900" />
+                            {getSafeImageSrc(selectedMember.photoUrl) ? (
+                                <img 
+                                    src={getSafeImageSrc(selectedMember.photoUrl)} 
+                                    className="w-full h-full rounded-full object-cover border-4 border-dark-900"
+                                    onError={handleImageError}
+                                    alt={selectedMember.fullNameEN}
+                                />
+                            ) : (
+                                <div className="w-full h-full rounded-full bg-black/50 flex items-center justify-center">
+                                    <User size={40} className="text-gray-500" />
+                                </div>
+                            )}
                         </div>
                         
                         <h2 className="text-2xl font-bold text-white mb-1">{selectedMember.fullNameEN}</h2>
@@ -164,7 +176,18 @@ export const CheckInPage: React.FC = () => {
                          const m = members.find(mem => mem.id === c.memberId);
                          return (
                             <div key={i} className="flex items-center gap-3 pb-3 border-b border-white/5 last:border-0">
-                                <img src={m?.photoUrl} className="w-10 h-10 rounded-full bg-white/10 object-cover" />
+                                {getSafeImageSrc(m?.photoUrl) ? (
+                                    <img 
+                                        src={getSafeImageSrc(m?.photoUrl)} 
+                                        className="w-10 h-10 rounded-full bg-white/10 object-cover"
+                                        onError={handleImageError}
+                                        alt={m?.fullNameEN}
+                                    />
+                                ) : (
+                                    <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                                        <User size={16} className="text-gray-500" />
+                                    </div>
+                                )}
                                 <div className="flex-1 min-w-0">
                                     <p className="font-bold text-sm text-white truncate">{m?.fullNameEN}</p>
                                     <p className="text-xs text-gray-500">{new Date(c.checkInTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>

@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { getSafeImageSrc, handleImageError } from '../utils/imageUtils';
 import { TRANSLATIONS } from '../constants';
 import { 
   LayoutDashboard, Users, ShoppingCart, BarChart3, 
@@ -130,8 +131,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
                  </div>
                  <div className="w-10 h-10 rounded-full border-2 border-brand-yellow p-[2px] shadow-[0_0_15px_rgba(255,235,59,0.3)]">
                     <div className="w-full h-full rounded-full bg-brand-surface flex items-center justify-center overflow-hidden">
-                        {user?.photoUrl ? (
-                            <img src={user.photoUrl} alt="User" className="w-full h-full object-cover" />
+                        {getSafeImageSrc(user?.photoUrl) ? (
+                            <img 
+                                src={getSafeImageSrc(user?.photoUrl)} 
+                                alt="User" 
+                                className="w-full h-full object-cover"
+                                onError={handleImageError}
+                            />
                         ) : (
                             <span className="font-bold text-brand-yellow">{user?.username.charAt(0).toUpperCase()}</span>
                         )}

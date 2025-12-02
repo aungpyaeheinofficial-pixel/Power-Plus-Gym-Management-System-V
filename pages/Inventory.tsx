@@ -383,8 +383,13 @@ export const Inventory: React.FC = () => {
                                         <div className="flex items-center gap-3">
                                             <div className="relative group/photo cursor-pointer flex-shrink-0" onClick={() => handleCardPhotoClick(product.id)}>
                                                 <div className="w-12 h-12 rounded-lg bg-dark-950 border border-white/10 overflow-hidden">
-                                                    {product.image ? (
-                                                        <img src={product.image} className="w-full h-full object-cover" />
+                                                    {getSafeImageSrc(product.image) ? (
+                                                        <img 
+                                                            src={getSafeImageSrc(product.image)} 
+                                                            className="w-full h-full object-cover"
+                                                            onError={handleImageError}
+                                                            alt={product.nameEN}
+                                                        />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center text-gray-500"><Package size={20}/></div>
                                                     )}

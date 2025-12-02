@@ -155,7 +155,18 @@ export const POS: React.FC = () => {
                         {filteredProducts.map(product => (
                             <div key={product.id} onClick={() => addToCart(product, 'Product')} className="glass-panel p-3 rounded-xl cursor-pointer hover:border-gold-500/50 transition-all active:scale-95 group relative overflow-hidden">
                                 <div className="aspect-square rounded-lg mb-3 overflow-hidden bg-black relative">
-                                    <img src={product.image} alt={product.nameEN} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                    {getSafeImageSrc(product.image) ? (
+                                        <img 
+                                            src={getSafeImageSrc(product.image)} 
+                                            alt={product.nameEN} 
+                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                            onError={handleImageError}
+                                        />
+                                    ) : (
+                                        <div className="w-full h-full bg-white/5 flex items-center justify-center">
+                                            <Package size={32} className="text-gray-500" />
+                                        </div>
+                                    )}
                                     {product.stock <= product.lowStockThreshold && (
                                         <div className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">Low Stock</div>
                                     )}

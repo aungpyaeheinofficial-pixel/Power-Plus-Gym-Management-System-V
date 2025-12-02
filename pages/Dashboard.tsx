@@ -1,6 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { useApp } from '../context/AppContext';
+import { getSafeImageSrc, handleImageError } from '../utils/imageUtils';
 import { 
   DollarSign, Users, UserCheck, AlertTriangle, 
   TrendingUp, ArrowRight, UserPlus, ShoppingCart, Clock, Activity, ArrowUpRight 

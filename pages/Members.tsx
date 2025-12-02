@@ -248,8 +248,13 @@ export const Members: React.FC = () => {
 
                   <div className="relative mb-4">
                     <div className="w-24 h-24 rounded-full border-2 border-white/10 p-1 bg-dark-900 shadow-xl overflow-hidden">
-                      {member.photoUrl ? (
-                        <img src={member.photoUrl} alt={member.fullNameEN} className="w-full h-full rounded-full object-cover" />
+                      {getSafeImageSrc(member.photoUrl) ? (
+                        <img 
+                            src={getSafeImageSrc(member.photoUrl)} 
+                            alt={member.fullNameEN} 
+                            className="w-full h-full rounded-full object-cover"
+                            onError={handleImageError}
+                        />
                       ) : (
                         <div className="w-full h-full rounded-full bg-white/5 flex items-center justify-center text-gray-500">
                           <User size={40} />
@@ -333,8 +338,13 @@ export const Members: React.FC = () => {
                           <div className="flex items-center gap-3">
                              <div className="relative group/photo cursor-pointer flex-shrink-0" onClick={() => handlePhotoClick(member.id)}>
                                 <div className="w-10 h-10 rounded-full border border-white/10 bg-black overflow-hidden">
-                                  {member.photoUrl ? (
-                                    <img src={member.photoUrl} className="w-full h-full object-cover" />
+                                  {getSafeImageSrc(member.photoUrl) ? (
+                                    <img 
+                                        src={getSafeImageSrc(member.photoUrl)} 
+                                        className="w-full h-full object-cover"
+                                        onError={handleImageError}
+                                        alt={member.fullNameEN}
+                                    />
                                   ) : (
                                     <div className="w-full h-full flex items-center justify-center text-gray-500"><User size={16}/></div>
                                   )}

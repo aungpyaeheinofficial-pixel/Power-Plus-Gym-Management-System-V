@@ -562,7 +562,16 @@ export const StaffPage: React.FC = () => {
                                                     <div className="flex items-center gap-3">
                                                         <div className="relative group/photo cursor-pointer flex-shrink-0" onClick={() => handleCardPhotoClick(s.id)}>
                                                             <div className="w-10 h-10 rounded-full border border-white/10 bg-black overflow-hidden">
-                                                                {s.photoUrl ? <img src={s.photoUrl} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-gray-500"><UserCog size={20}/></div>}
+                                                                {getSafeImageSrc(s.photoUrl) ? (
+                                                                    <img 
+                                                                        src={getSafeImageSrc(s.photoUrl)} 
+                                                                        className="w-full h-full object-cover"
+                                                                        onError={handleImageError}
+                                                                        alt={s.name}
+                                                                    />
+                                                                ) : (
+                                                                    <div className="w-full h-full flex items-center justify-center text-gray-500"><UserCog size={20}/></div>
+                                                                )}
                                                             </div>
                                                             <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover/photo:opacity-100 transition-opacity">
                                                                 <Camera size={12} className="text-white"/>
