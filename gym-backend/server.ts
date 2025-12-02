@@ -789,10 +789,11 @@ app.get('*', (req, res, next) => {
   res.sendFile(path.join(distPath, 'index.html'));
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Power Plus Gym API Server running on port ${PORT}`);
   console.log(`📊 Database: power_plus_gym`);
-  console.log(`🌐 API Base URL: http://localhost:${PORT}/api`);
+  console.log(`🌐 API Base URL: http://0.0.0.0:${PORT}/api`);
+  console.log(`🌐 External URL: http://167.172.90.182:${PORT}/api`);
   console.log(`📱 Serving frontend from: ${distPath}`);
 });
 
