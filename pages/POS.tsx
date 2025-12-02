@@ -91,11 +91,11 @@ export const POS: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row h-full gap-6">
+    <div className="flex flex-col lg:flex-row h-full gap-6 overflow-hidden">
       {/* Left Side - Catalog */}
       <div className="flex-1 flex flex-col min-h-0 bg-dark-900/50 backdrop-blur border border-white/5 rounded-2xl overflow-hidden">
         {/* Top Bar - Sticky on mobile */}
-        <div className="sticky top-0 z-10 bg-dark-900/95 backdrop-blur-sm p-4 border-b border-white/5 space-y-4">
+        <div className="sticky top-0 z-20 bg-dark-900/95 backdrop-blur-sm p-3 sm:p-4 border-b border-white/5 space-y-3 sm:space-y-4 shadow-lg">
             <div className="flex gap-2 sm:gap-4">
                 <button 
                     onClick={() => setActiveTab('Products')}
