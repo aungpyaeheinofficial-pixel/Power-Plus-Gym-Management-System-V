@@ -237,8 +237,25 @@ export const POS: React.FC = () => {
         </div>
       </div>
 
-      {/* Right Side - Cart */}
-      <div className="w-full lg:w-[400px] glass-panel rounded-2xl flex flex-col h-full border border-white/10 bg-dark-900/80 backdrop-blur-xl mt-24 lg:mt-0">
+      {/* Floating Cart Toggle Button - Only show when cart has items */}
+      {cartItemCount > 0 && (
+        <button
+          onClick={() => setShowCart(!showCart)}
+          className="fixed bottom-6 right-6 lg:hidden z-50 bg-gold-500 hover:bg-gold-600 text-black font-bold p-4 rounded-full shadow-2xl shadow-gold-500/50 flex items-center gap-2 transition-all active:scale-95"
+        >
+          <ShoppingCart size={24} />
+          <span className="bg-black text-gold-500 rounded-full px-2 py-1 text-sm font-bold">{cartItemCount}</span>
+          {showCart ? <X size={20} /> : <ChevronRight size={20} />}
+        </button>
+      )}
+
+      {/* Right Side - Cart - Only show when items are added or manually opened */}
+      {(showCart || cartItemCount > 0) && (
+      <div className={`w-full lg:w-[400px] glass-panel rounded-2xl flex flex-col h-full border border-white/10 bg-dark-900/80 backdrop-blur-xl transition-all duration-300 ${
+        showCart || cartItemCount === 0 
+          ? 'mt-24 lg:mt-0' 
+          : 'hidden lg:flex'
+      } ${showCart ? 'fixed inset-y-0 right-0 z-40 lg:relative lg:z-auto' : 'lg:flex'}`}>
         <div className="p-5 border-b border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ShoppingCart className="text-gold-500" size={20} />
