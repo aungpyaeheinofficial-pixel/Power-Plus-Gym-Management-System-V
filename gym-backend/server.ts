@@ -68,6 +68,66 @@ app.post('/api/users/login', async (req, res) => {
   }
 });
 
+app.put('/api/users/reset-password', async (req, res) => {
+  try {
+    const { username, oldPassword, newPassword } = req.body;
+    
+    // Verify old password first
+    const [rows]: any = await pool.query(
+      'SELECT id, role FROM users WHERE username = ? AND password_hash = ?',
+      [username, oldPassword]
+    );
+    
+    if (rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid current password' });
+    }
+    
+    const user = rows[0];
+    
+    // Only admin can reset passwords (or user can reset their own)
+    if (user.role !== 'Admin' && rows[0].username !== username) {
+      return res.status(403).json({ error: 'Only admin can reset passwords' });
+    }
+    
+    // Update password
+    await pool.execute(
+      'UPDATE users SET password_hash = ? WHERE username = ?',
+      [newPassword, username]
+    );
+    
+    res.json({ success: true, message: 'Password updated successfully' });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/users/:id/reset-password', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { newPassword, adminPassword } = req.body;
+    
+    // Verify admin password
+    const [adminRows]: any = await pool.query(
+      'SELECT id, role FROM users WHERE id = ? AND password_hash = ? AND role = ?',
+      [id, adminPassword, 'Admin']
+    );
+    
+    if (adminRows.length === 0) {
+      return res.status(401).json({ error: 'Admin authentication required' });
+    }
+    
+    // Update password for the target user
+    await pool.execute(
+      'UPDATE users SET password_hash = ? WHERE id = ?',
+      [newPassword, id]
+    );
+    
+    res.json({ success: true, message: 'Password reset successfully' });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ==================== MEMBERSHIP TYPES ====================
 app.get('/api/membership-types', async (_req, res) => {
   try {
