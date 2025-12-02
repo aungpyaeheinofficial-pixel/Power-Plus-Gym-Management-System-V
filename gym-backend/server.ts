@@ -4,11 +4,10 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import { pool } from './db';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Get __dirname for CommonJS (TypeScript compiles to CommonJS)
+const __dirname = path.resolve();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -779,9 +778,20 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', message: 'Power Plus Gym API is running' });
 });
 
+// SPA fallback - serve index.html for all non-API routes
+app.get('*', (req, res, next) => {
+  // Skip API routes
+  if (req.path.startsWith('/api')) {
+    return next();
+  }
+  // Serve index.html for SPA routing
+  res.sendFile(path.join(distPath, 'index.html'));
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 Power Plus Gym API Server running on port ${PORT}`);
   console.log(`📊 Database: power_plus_gym`);
   console.log(`🌐 API Base URL: http://localhost:${PORT}/api`);
+  console.log(`📱 Serving frontend from: ${distPath}`);
 });
 
