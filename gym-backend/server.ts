@@ -330,17 +330,70 @@ app.put('/api/products/:id', async (req, res) => {
     const { id } = req.params;
     const { name_en, name_mm, category_id, sku, price, cost_price, stock, low_stock_threshold, unit, image, is_active } = req.body;
     
-    // Validate category_id - must not be null
-    if (!category_id) {
-      return res.status(400).json({ error: 'category_id is required' });
+    // Build dynamic UPDATE query only for provided fields
+    const updates: string[] = [];
+    const values: any[] = [];
+    
+    if (name_en !== undefined) {
+      updates.push('name_en = ?');
+      values.push(name_en);
+    }
+    if (name_mm !== undefined) {
+      updates.push('name_mm = ?');
+      values.push(name_mm);
+    }
+    if (category_id !== undefined) {
+      // Validate category_id only if it's being updated
+      if (!category_id) {
+        return res.status(400).json({ error: 'category_id cannot be null' });
+      }
+      updates.push('category_id = ?');
+      values.push(category_id);
+    }
+    if (sku !== undefined) {
+      updates.push('sku = ?');
+      values.push(sku || null);
+    }
+    if (price !== undefined) {
+      updates.push('price = ?');
+      values.push(price);
+    }
+    if (cost_price !== undefined) {
+      updates.push('cost_price = ?');
+      values.push(cost_price || 0);
+    }
+    if (stock !== undefined) {
+      updates.push('stock = ?');
+      values.push(stock || 0);
+    }
+    if (low_stock_threshold !== undefined) {
+      updates.push('low_stock_threshold = ?');
+      values.push(low_stock_threshold || 10);
+    }
+    if (unit !== undefined) {
+      updates.push('unit = ?');
+      values.push(unit || 'pcs');
+    }
+    if (image !== undefined) {
+      // Truncate image URL if too long
+      const safeImage = image ? (image.length > 255 ? image.substring(0, 255) : image) : null;
+      updates.push('image = ?');
+      values.push(safeImage);
+    }
+    if (is_active !== undefined) {
+      updates.push('is_active = ?');
+      values.push(is_active);
     }
     
-    // Truncate image URL if too long
-    const safeImage = image ? (image.length > 255 ? image.substring(0, 255) : image) : null;
+    // Only update if there are fields to update
+    if (updates.length === 0) {
+      return res.status(400).json({ error: 'No fields to update' });
+    }
     
+    values.push(id);
     await pool.execute(
-      `UPDATE products SET name_en = ?, name_mm = ?, category_id = ?, sku = ?, price = ?, cost_price = ?, stock = ?, low_stock_threshold = ?, unit = ?, image = ?, is_active = ? WHERE id = ?`,
-      [name_en, name_mm, category_id, sku || null, price, cost_price || 0, stock || 0, low_stock_threshold || 10, unit || 'pcs', safeImage, is_active, id]
+      `UPDATE products SET ${updates.join(', ')} WHERE id = ?`,
+      values
     );
     res.json({ success: true });
   } catch (error: any) {
