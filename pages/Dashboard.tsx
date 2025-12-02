@@ -4,7 +4,7 @@ import { useApp } from '../context/AppContext';
 import { getSafeImageSrc, handleImageError } from '../utils/imageUtils';
 import { 
   DollarSign, Users, UserCheck, AlertTriangle, 
-  TrendingUp, ArrowRight, UserPlus, ShoppingCart, Clock, Activity, ArrowUpRight 
+  TrendingUp, ArrowRight, UserPlus, ShoppingCart, Clock, Activity, ArrowUpRight, Package
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer 
@@ -27,13 +27,35 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     const todayStr = now.toISOString().split('T')[0];
     const msPerDay = 24 * 60 * 60 * 1000;
 
-    // 1. Revenue This Month
-    const monthlyRevenue = transactions
-      .filter(t => {
-          const d = new Date(t.date);
-          return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
-      })
-      .reduce((sum, t) => sum + t.total, 0);
+    // Filter transactions for current month
+    const monthlyTransactions = transactions.filter(t => {
+        const d = new Date(t.date);
+        return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+    });
+
+    // 1. Separate Revenue This Month: Membership vs Product Sales
+    let membershipRevenue = 0;
+    let productSalesRevenue = 0;
+
+    monthlyTransactions.forEach(t => {
+        if (t.type === 'Membership') {
+            membershipRevenue += t.total;
+        } else if (t.type === 'Product') {
+            productSalesRevenue += t.total;
+        } else if (t.type === 'Mixed') {
+            // For mixed transactions, split by item type
+            t.items.forEach(item => {
+                const amount = item.price * item.quantity;
+                if (item.type === 'Membership') {
+                    membershipRevenue += amount;
+                } else if (item.type === 'Product') {
+                    productSalesRevenue += amount;
+                }
+            });
+        }
+    });
+
+    const monthlyRevenue = membershipRevenue + productSalesRevenue;
 
     // 2. Active Members
     const activeMembers = members.filter(m => {
@@ -59,7 +81,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         return days >= 0 && days <= 7;
     });
 
-    // 5. Chart Data (Last 7 Days)
+    // 5. Chart Data (Last 7 Days) - Separated by type
     const chartData = [];
     for (let i = 6; i >= 0; i--) {
         const d = new Date(now);
@@ -67,15 +89,40 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
         const dateStr = d.toISOString().split('T')[0];
         const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' });
         
-        const dayRevenue = transactions
+        let dayMembership = 0;
+        let dayProducts = 0;
+        
+        transactions
             .filter(t => t.date.startsWith(dateStr))
-            .reduce((sum, t) => sum + t.total, 0);
+            .forEach(t => {
+                if (t.type === 'Membership') {
+                    dayMembership += t.total;
+                } else if (t.type === 'Product') {
+                    dayProducts += t.total;
+                } else if (t.type === 'Mixed') {
+                    t.items.forEach(item => {
+                        const amount = item.price * item.quantity;
+                        if (item.type === 'Membership') {
+                            dayMembership += amount;
+                        } else if (item.type === 'Product') {
+                            dayProducts += amount;
+                        }
+                    });
+                }
+            });
             
-        chartData.push({ name: dayLabel, revenue: dayRevenue });
+        chartData.push({ 
+            name: dayLabel, 
+            membership: dayMembership,
+            products: dayProducts,
+            total: dayMembership + dayProducts
+        });
     }
 
     return {
         monthlyRevenue,
+        membershipRevenue,
+        productSalesRevenue,
         activeMembers,
         todayCheckIns,
         expiringCount: expiringSoon.length,
@@ -114,12 +161,40 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
               <div className="flex justify-between items-start mb-4 relative z-10">
                   <div className="p-3 bg-brand-yellow/10 rounded-2xl text-brand-yellow shadow-sm border border-brand-yellow/20"><DollarSign size={28} /></div>
                   <div className="flex items-center text-xs text-brand-yellow font-bold bg-brand-yellow/10 px-2 py-1 rounded-full border border-brand-yellow/20">
-                    <ArrowUpRight size={12} className="mr-1" /> +12.5%
+                    <ArrowUpRight size={12} className="mr-1" /> Total
                   </div>
               </div>
               <div>
-                  <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">Monthly Revenue</p>
+                  <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">Total Revenue</p>
                   <h3 className="text-4xl font-black text-white tracking-tight">{stats.monthlyRevenue.toLocaleString()} <span className="text-sm font-medium text-gray-600">Ks</span></h3>
+              </div>
+          </div>
+
+          <div className="premium-card p-6 rounded-3xl relative overflow-hidden group border-t-4 border-t-blue-500">
+              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-500"><Users size={100} className="text-blue-500"/></div>
+              <div className="flex justify-between items-start mb-4 relative z-10">
+                  <div className="p-3 bg-blue-500/10 rounded-2xl text-blue-500 shadow-sm border border-blue-500/20"><Users size={28} /></div>
+                  <div className="flex items-center text-xs text-blue-500 font-bold bg-blue-500/10 px-2 py-1 rounded-full border border-blue-500/20">
+                    Membership
+                  </div>
+              </div>
+              <div>
+                  <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">Membership Sales</p>
+                  <h3 className="text-4xl font-black text-white tracking-tight">{stats.membershipRevenue.toLocaleString()} <span className="text-sm font-medium text-gray-600">Ks</span></h3>
+              </div>
+          </div>
+
+          <div className="premium-card p-6 rounded-3xl relative overflow-hidden group border-t-4 border-t-green-500">
+              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-500"><Package size={100} className="text-green-500"/></div>
+              <div className="flex justify-between items-start mb-4 relative z-10">
+                  <div className="p-3 bg-green-500/10 rounded-2xl text-green-500 shadow-sm border border-green-500/20"><Package size={28} /></div>
+                  <div className="flex items-center text-xs text-green-500 font-bold bg-green-500/10 px-2 py-1 rounded-full border border-green-500/20">
+                    Products
+                  </div>
+              </div>
+              <div>
+                  <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1">Product Sales</p>
+                  <h3 className="text-4xl font-black text-white tracking-tight">{stats.productSalesRevenue.toLocaleString()} <span className="text-sm font-medium text-gray-600">Ks</span></h3>
               </div>
           </div>
 
@@ -184,7 +259,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                   <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={stats.chartData}>
                           <defs>
-                              <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                              <linearGradient id="colorMembership" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
+                                  <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                              </linearGradient>
+                              <linearGradient id="colorProducts" x1="0" y1="0" x2="0" y2="1">
+                                  <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
+                                  <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                              </linearGradient>
+                              <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
                                   <stop offset="5%" stopColor={chartColor} stopOpacity={0.3}/>
                                   <stop offset="95%" stopColor={chartColor} stopOpacity={0}/>
                               </linearGradient>
@@ -214,22 +297,48 @@ export const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                                   borderRadius: '12px',
                                   boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
                               }}
-                              itemStyle={{ color: chartColor, fontWeight: 'bold', fontFamily: 'monospace' }}
+                              itemStyle={{ fontWeight: 'bold', fontFamily: 'monospace' }}
                               labelStyle={{ color: '#fff', marginBottom: '8px', textTransform: 'uppercase', fontSize: '12px', fontWeight: 'bold' }}
                               cursor={{ stroke: '#FFEB3B', strokeWidth: 1, strokeDasharray: '5 5' }}
-                              formatter={(value: number) => [`${value.toLocaleString()} Ks`, 'REVENUE']}
+                              formatter={(value: number, name: string) => [`${value.toLocaleString()} Ks`, name === 'membership' ? 'Membership' : name === 'products' ? 'Product Sales' : 'Total Revenue']}
                           />
                           <Area 
                               type="monotone" 
-                              dataKey="revenue" 
-                              stroke={chartColor} 
-                              strokeWidth={4}
+                              dataKey="membership" 
+                              stroke="#3B82F6" 
+                              strokeWidth={2}
                               fillOpacity={1} 
-                              fill="url(#colorRevenue)" 
+                              fill="url(#colorMembership)" 
                               animationDuration={1500}
+                              name="membership"
+                          />
+                          <Area 
+                              type="monotone" 
+                              dataKey="products" 
+                              stroke="#10B981" 
+                              strokeWidth={2}
+                              fillOpacity={1} 
+                              fill="url(#colorProducts)" 
+                              animationDuration={1500}
+                              name="products"
+                          />
+                          <Area 
+                              type="monotone" 
+                              dataKey="total" 
+                              stroke={chartColor} 
+                              strokeWidth={3}
+                              fillOpacity={1} 
+                              fill="url(#colorTotal)" 
+                              animationDuration={1500}
+                              name="total"
                           />
                       </AreaChart>
                   </ResponsiveContainer>
+                  <div className="flex gap-4 text-xs mt-4 justify-center">
+                      <div className="flex items-center gap-2 text-gray-400"><span className="w-2 h-2 rounded-full bg-blue-500"></span> Membership</div>
+                      <div className="flex items-center gap-2 text-gray-400"><span className="w-2 h-2 rounded-full bg-green-500"></span> Product Sales</div>
+                      <div className="flex items-center gap-2 text-gray-400"><span className="w-2 h-2 rounded-full bg-yellow-500"></span> Total Revenue</div>
+                  </div>
               </div>
           </div>
 

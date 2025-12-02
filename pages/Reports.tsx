@@ -18,7 +18,29 @@ export const ReportsPage: React.FC = () => {
   const [isExporting, setIsExporting] = useState(false);
 
   // --- 1. Summary Stats Calculation ---
-  const totalRevenue = transactions.reduce((acc, t) => acc + t.total, 0);
+  // Separate total revenue by type
+  let totalMembershipRevenue = 0;
+  let totalProductRevenue = 0;
+  
+  transactions.forEach(t => {
+      if (t.type === 'Membership') {
+          totalMembershipRevenue += t.total;
+      } else if (t.type === 'Product') {
+          totalProductRevenue += t.total;
+      } else if (t.type === 'Mixed') {
+          // For mixed transactions, split by item type
+          t.items.forEach(item => {
+              const amount = item.price * item.quantity;
+              if (item.type === 'Membership') {
+                  totalMembershipRevenue += amount;
+              } else if (item.type === 'Product') {
+                  totalProductRevenue += amount;
+              }
+          });
+      }
+  });
+  
+  const totalRevenue = totalMembershipRevenue + totalProductRevenue;
   
   const newMembersCount = members.filter(m => {
       const joinDate = new Date(m.joinDate);
@@ -174,7 +196,7 @@ export const ReportsPage: React.FC = () => {
             </div>
 
             {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div className="bg-dark-900 border border-white/5 p-6 rounded-xl relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4 opacity-5"><DollarSign size={64}/></div>
                     <div className="flex items-center gap-3 mb-2">
@@ -187,17 +209,25 @@ export const ReportsPage: React.FC = () => {
                     <div className="absolute top-0 right-0 p-4 opacity-5"><Users size={64}/></div>
                     <div className="flex items-center gap-3 mb-2">
                         <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500"><Users size={20}/></div>
-                        <span className="text-gray-400 text-xs uppercase font-bold tracking-wider">New Members</span>
+                        <span className="text-gray-400 text-xs uppercase font-bold tracking-wider">Membership Sales</span>
                     </div>
-                    <h3 className="text-2xl lg:text-3xl font-bold text-white font-mono">{newMembersCount}</h3>
+                    <h3 className="text-2xl lg:text-3xl font-bold text-white font-mono">{totalMembershipRevenue.toLocaleString()} <span className="text-sm font-sans text-gray-500">Ks</span></h3>
                 </div>
                 <div className="bg-dark-900 border border-white/5 p-6 rounded-xl relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4 opacity-5"><Package size={64}/></div>
                     <div className="flex items-center gap-3 mb-2">
                         <div className="p-2 bg-green-500/10 rounded-lg text-green-500"><Package size={20}/></div>
-                        <span className="text-gray-400 text-xs uppercase font-bold tracking-wider">Products Sold</span>
+                        <span className="text-gray-400 text-xs uppercase font-bold tracking-wider">Product Sales</span>
                     </div>
-                    <h3 className="text-2xl lg:text-3xl font-bold text-white font-mono">{productSalesCount}</h3>
+                    <h3 className="text-2xl lg:text-3xl font-bold text-white font-mono">{totalProductRevenue.toLocaleString()} <span className="text-sm font-sans text-gray-500">Ks</span></h3>
+                </div>
+                <div className="bg-dark-900 border border-white/5 p-6 rounded-xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-4 opacity-5"><Users size={64}/></div>
+                    <div className="flex items-center gap-3 mb-2">
+                        <div className="p-2 bg-purple-500/10 rounded-lg text-purple-500"><Users size={20}/></div>
+                        <span className="text-gray-400 text-xs uppercase font-bold tracking-wider">New Members</span>
+                    </div>
+                    <h3 className="text-2xl lg:text-3xl font-bold text-white font-mono">{newMembersCount}</h3>
                 </div>
             </div>
 
