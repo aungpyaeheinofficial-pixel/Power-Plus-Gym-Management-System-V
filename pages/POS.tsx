@@ -91,11 +91,11 @@ export const POS: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row h-full gap-6 overflow-hidden">
+    <div className="flex flex-col lg:flex-row h-full gap-6 overflow-y-auto lg:overflow-hidden">
       {/* Left Side - Catalog */}
       <div className="flex-1 flex flex-col min-h-0 bg-dark-900/50 backdrop-blur border border-white/5 rounded-2xl overflow-hidden">
-        {/* Top Bar - Always visible, sticky on scroll */}
-        <div className="sticky top-0 z-50 bg-dark-900 backdrop-blur-md p-3 sm:p-4 border-b-2 border-gold-500/30 space-y-3 sm:space-y-4 shadow-2xl">
+        {/* Top Bar - Always visible at top, not sticky on mobile */}
+        <div className="bg-dark-900 backdrop-blur-md p-3 sm:p-4 border-b-2 border-gold-500/30 space-y-3 sm:space-y-4 shadow-2xl lg:sticky lg:top-0 lg:z-50">
             <div className="flex gap-2 sm:gap-4">
                 <button 
                     onClick={(e) => {
@@ -143,7 +143,7 @@ export const POS: React.FC = () => {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar min-h-0">
+        <div className="flex-1 overflow-y-auto p-4 custom-scrollbar min-h-0" style={{ maxHeight: 'calc(100vh - 300px)' }}>
             {activeTab === 'Products' ? (
                 <>
                     {/* Categories */}
