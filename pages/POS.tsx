@@ -36,6 +36,8 @@ export const POS: React.FC = () => {
       }
       return [...prev, { item, quantity: 1, type }];
     });
+    // Auto-show cart when item is added
+    setShowCart(true);
   };
 
   const removeFromCart = (id: string, type: 'Product' | 'Membership') => {
@@ -89,6 +91,7 @@ export const POS: React.FC = () => {
     setShowReceipt(false);
     setCart([]);
     setSelectedMemberId('');
+    setShowCart(false);
   };
 
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -341,6 +344,7 @@ export const POS: React.FC = () => {
           </button>
         </div>
       </div>
+      )}
 
       {/* Receipt Modal */}
       {showReceipt && (
