@@ -232,7 +232,7 @@ export const POS: React.FC = () => {
       </div>
 
       {/* Right Side - Cart */}
-      <div className="w-full lg:w-[400px] glass-panel rounded-2xl flex flex-col h-full border border-white/10 bg-dark-900/80 backdrop-blur-xl">
+      <div className="w-full lg:w-[400px] glass-panel rounded-2xl flex flex-col h-full border border-white/10 bg-dark-900/80 backdrop-blur-xl mt-24 lg:mt-0">
         <div className="p-5 border-b border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <ShoppingCart className="text-gold-500" size={20} />
