@@ -187,7 +187,7 @@ export const ReportsPage: React.FC = () => {
               const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
               
               pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-              pdf.save(`PowerPlusGym_${activeReport}_Report_${new Date().toISOString().slice(0,10)}.pdf`);
+              pdf.save(`A7SmartGym_${activeReport}_Report_${new Date().toISOString().slice(0,10)}.pdf`);
           } catch (e) {
               console.error("PDF Export Failed", e);
               alert("Failed to generate PDF");
@@ -225,7 +225,7 @@ export const ReportsPage: React.FC = () => {
         <div id="report-content" className="flex-1 overflow-y-auto custom-scrollbar bg-dark-950 p-2 sm:p-6 rounded-xl border border-white/5">
             {/* Header for PDF */}
             <div className="text-center mb-10 border-b border-white/10 pb-6">
-                <h1 className="text-3xl font-bold text-white uppercase tracking-wider mb-2">Power Plus Gym</h1>
+                <h1 className="text-3xl font-bold text-white uppercase tracking-wider mb-2">A7 smart Gym System</h1>
                 <p className="text-gold-500 font-bold tracking-widest uppercase">{activeReport} Business Analytics</p>
                 <p className="text-gray-500 text-xs mt-2 font-mono">Generated on {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()}</p>
             </div>
@@ -473,7 +473,7 @@ export const ReportsPage: React.FC = () => {
             </div>
 
             <div className="mt-8 pt-8 border-t border-white/10 flex justify-between text-xs text-gray-500 font-mono">
-                <p>Power Plus Gym Management System • Confidential Report</p>
+                <p>A7 smart Gym System • Confidential Report</p>
                 <p>Page 1 of 1</p>
             </div>
         </div>

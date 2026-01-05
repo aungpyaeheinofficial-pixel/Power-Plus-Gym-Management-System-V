@@ -222,7 +222,7 @@ export const TRANSLATIONS = {
     save: 'Save',
     cancel: 'Cancel',
     view: 'View',
-    loginTitle: 'Power Plus Gym',
+    loginTitle: 'A7 smart Gym System',
     loginSubtitle: 'Management System',
     username: 'Username',
     password: 'Password',

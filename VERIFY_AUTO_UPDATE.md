@@ -71,3 +71,5 @@ The APK contains the Capacitor config. If it has `server.url`, it will load from
 - UI doesn't update after server rebuild
 - Need to rebuild APK for every change
 
+
+

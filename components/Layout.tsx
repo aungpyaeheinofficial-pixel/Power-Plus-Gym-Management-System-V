@@ -61,7 +61,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
                 <Dumbbell className="w-6 h-6 text-black" />
              </div>
              <div>
-                <h1 className="text-2xl font-black italic tracking-tighter text-white uppercase transform -skew-x-6">POWER PLUS</h1>
+                <h1 className="text-2xl font-black italic tracking-tighter text-white uppercase transform -skew-x-6">A7 SMART</h1>
                 <p className="text-[10px] text-brand-yellow tracking-[0.3em] font-bold uppercase text-center bg-white/5 rounded py-0.5 mt-0.5">GYM SYSTEM</p>
              </div>
           </div>

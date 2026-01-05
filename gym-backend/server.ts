@@ -776,7 +776,7 @@ app.get('/api/settings', async (_req, res) => {
     if (rows.length > 0) {
       res.json(rows[0]);
     } else {
-      res.json({ gym_name: 'Power Plus Gym', address: '', phone: '', currency_symbol: 'Ks', tax_rate: 0 });
+      res.json({ gym_name: 'A7 smart Gym System', address: '', phone: '', currency_symbol: 'Ks', tax_rate: 0 });
     }
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -800,7 +800,7 @@ app.put('/api/settings', async (req, res) => {
 
 // Health check
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', message: 'Power Plus Gym API is running' });
+  res.json({ status: 'ok', message: 'A7 smart Gym System API is running' });
 });
 
 // SPA fallback - serve index.html for all non-API routes
@@ -824,7 +824,7 @@ app.use((req, res, next) => {
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Power Plus Gym API Server running on port ${PORT}`);
+  console.log(`🚀 A7 smart Gym System API Server running on port ${PORT}`);
   console.log(`📊 Database: power_plus_gym`);
   console.log(`🌐 API Base URL: http://0.0.0.0:${PORT}/api`);
   console.log(`🌐 External URL: http://167.172.90.182:${PORT}/api`);

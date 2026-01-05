@@ -17,7 +17,7 @@ export const Settings: React.FC<SettingsProps> = ({ onNavigate }) => {
   
   // General Settings State
   const [gymInfo, setGymInfo] = useState({
-      name: 'Power Plus Gym',
+      name: 'A7 smart Gym System',
       address: '123 Main Street, Yangon',
       phone: '09-123456789'
   });
