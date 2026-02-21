@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.powerplusgym.app',
-  appName: 'A7 smart Gym System',
+  appName: 'Ace GYM System',
   webDir: 'dist',
   server: {
     // Load app from server for automatic updates

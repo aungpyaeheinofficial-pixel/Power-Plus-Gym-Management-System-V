@@ -7,7 +7,7 @@ interface AppContextType {
   user: User | null;
   login: (u: User) => void;
   logout: () => void;
-  
+
   language: Language;
   setLanguage: (l: Language) => void;
 
@@ -15,32 +15,32 @@ interface AppContextType {
   addMember: (m: Member) => Promise<void>;
   updateMember: (id: string, m: Partial<Member>) => Promise<void>;
   deleteMember: (id: string) => Promise<void>;
-  
+
   products: Product[];
   addProduct: (p: Product) => Promise<void>;
   updateProduct: (id: string, p: Partial<Product>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
-  
+
   productCategories: ProductCategory[];
   addProductCategory: (c: ProductCategory) => Promise<void>;
   updateProductCategory: (id: string, c: Partial<ProductCategory>) => Promise<void>;
   deleteProductCategory: (id: string) => Promise<void>;
-  
+
   transactions: Transaction[];
   addTransaction: (t: Transaction) => Promise<void>;
-  
+
   checkIns: CheckIn[];
   addCheckIn: (c: CheckIn) => Promise<void>;
-  
+
   staff: Staff[];
   addStaff: (s: Staff) => Promise<void>;
   updateStaff: (id: string, s: Partial<Staff>) => Promise<void>;
   deleteStaff: (id: string) => Promise<void>;
-  
+
   staffSchedules: StaffSchedule[];
   addStaffSchedule: (s: StaffSchedule) => Promise<void>;
   deleteStaffSchedule: (id: string) => Promise<void>;
-  
+
   staffAttendance: StaffAttendance[];
   clockInStaff: (staffId: string) => Promise<void>;
   clockOutStaff: (staffId: string) => Promise<void>;
@@ -54,7 +54,7 @@ interface AppContextType {
   resetSystem: (mode: 'Demo' | 'Clear') => Promise<void>;
   exportBackup: () => void;
   restoreBackup: (file: File) => Promise<void>;
-  
+
   loading: boolean;
   error: string | null;
 }
@@ -66,7 +66,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [language, setLanguage] = useState<Language>('EN');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const [members, setMembers] = useState<Member[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [productCategories, setProductCategories] = useState<ProductCategory[]>([]);
@@ -81,9 +81,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     const storedUser = localStorage.getItem('ppg_user');
     if (storedUser) setUser(JSON.parse(storedUser));
-    
+
     document.documentElement.classList.add('dark');
-    
+
     loadInitialData();
   }, []);
 
@@ -279,7 +279,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (data.nrc !== undefined) updateData.nrc = data.nrc;
       if (data.dob !== undefined) updateData.dob = data.dob;
       if (data.notes !== undefined) updateData.notes = data.notes;
-      
+
       await api.updateMember(id, updateData);
       await loadInitialData();
     } catch (err: any) {
@@ -336,7 +336,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (data.unit) updateData.unit = data.unit;
       if (data.image !== undefined) updateData.image = data.image;
       if (data.isActive !== undefined) updateData.is_active = data.isActive ? 1 : 0;
-      
+
       await api.updateProduct(id, updateData);
       await loadInitialData();
     } catch (err: any) {
@@ -424,7 +424,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       throw err;
     }
   };
-  
+
   const addCheckIn = async (c: CheckIn) => {
     try {
       await api.createCheckIn({
@@ -474,7 +474,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (data.photoUrl !== undefined) updateData.photo_url = data.photoUrl;
       if (data.status) updateData.status = data.status;
       if (data.weeklySchedule) updateData.weeklySchedule = data.weeklySchedule;
-      
+
       await api.updateStaff(id, updateData);
       await loadInitialData();
     } catch (err: any) {
@@ -492,11 +492,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       throw err;
     }
   };
-  
+
   const addStaffSchedule = async (s: StaffSchedule) => {
     setStaffSchedules(prev => [...prev, s]);
   };
-  
+
   const deleteStaffSchedule = async (id: string) => {
     setStaffSchedules(prev => prev.filter(s => s.id !== id));
   };
@@ -505,23 +505,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       const staffMember = staff.find(s => s.id === staffId);
       const now = new Date();
-      
+
       let status: StaffAttendance['status'] = 'Working';
 
       if (staffMember?.weeklySchedule) {
-          const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-          const todaySchedule = staffMember.weeklySchedule[days[now.getDay()] as keyof WeeklySchedule];
-          
-          if (todaySchedule?.working && todaySchedule.start) {
-              const [h, m] = todaySchedule.start.split(':').map(Number);
-              const scheduleTime = new Date(now);
-              scheduleTime.setHours(h, m, 0, 0);
-              
-              const diffMinutes = (now.getTime() - scheduleTime.getTime()) / 60000;
-              if (diffMinutes > 15) {
-                  status = 'Late';
-              }
+        const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+        const todaySchedule = staffMember.weeklySchedule[days[now.getDay()] as keyof WeeklySchedule];
+
+        if (todaySchedule?.working && todaySchedule.start) {
+          const [h, m] = todaySchedule.start.split(':').map(Number);
+          const scheduleTime = new Date(now);
+          scheduleTime.setHours(h, m, 0, 0);
+
+          const diffMinutes = (now.getTime() - scheduleTime.getTime()) / 60000;
+          if (diffMinutes > 15) {
+            status = 'Late';
           }
+        }
       }
 
       await api.clockInStaff({
@@ -541,10 +541,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       const record = staffAttendance.find(r => r.staffId === staffId && !r.clockOut);
       if (!record) return;
-      
+
       const clockOut = new Date();
       const clockIn = new Date(record.clockIn);
-      
+
       const diffMs = clockOut.getTime() - clockIn.getTime();
       const hours = Math.floor(diffMs / (1000 * 60 * 60));
       const mins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
@@ -591,7 +591,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (mt.description !== undefined) updateData.description = mt.description;
       if (mt.colorCode !== undefined) updateData.color_code = mt.colorCode;
       if (mt.isActive !== undefined) updateData.is_active = mt.isActive ? 1 : 0;
-      
+
       await api.updateMembershipType(id, updateData);
       await loadInitialData();
     } catch (err: any) {
@@ -626,38 +626,38 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const exportBackup = () => {
-      const data = {
-          timestamp: new Date().toISOString(),
-          members,
-          products,
-          productCategories,
-          transactions,
-          checkIns,
-          staff,
-          staffSchedules,
-          staffAttendance,
-          membershipTypes
-      };
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `A7SmartGym_Backup_${new Date().toISOString().slice(0,10)}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+    const data = {
+      timestamp: new Date().toISOString(),
+      members,
+      products,
+      productCategories,
+      transactions,
+      checkIns,
+      staff,
+      staffSchedules,
+      staffAttendance,
+      membershipTypes
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `AceGym_Backup_${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
 
   const restoreBackup = async (file: File) => {
-      try {
-          const text = await file.text();
-          const data = JSON.parse(text);
-          // Would need backend implementation to restore
-          console.log('Restore backup:', data);
-      } catch (e) {
-          console.error("Backup restore failed", e);
-          alert("Invalid backup file");
-      }
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      // Would need backend implementation to restore
+      console.log('Restore backup:', data);
+    } catch (e) {
+      console.error("Backup restore failed", e);
+      alert("Invalid backup file");
+    }
   };
 
   return (

@@ -66,7 +66,7 @@ async function validateMembershipType(membershipTypeId: string | number | null |
   if (!membershipTypeId) return null;
   const id = typeof membershipTypeId === 'string' ? parseInt(membershipTypeId) : membershipTypeId;
   if (isNaN(id)) return null;
-  
+
   try {
     const [rows]: any = await pool.query('SELECT id FROM membership_types WHERE id = ?', [id]);
     return rows.length > 0 ? id : null;
@@ -105,23 +105,23 @@ app.post('/api/users/login', async (req, res) => {
 app.put('/api/users/reset-password', async (req, res) => {
   try {
     const { username, oldPassword, newPassword } = req.body;
-    
+
     // Verify old password first
     const [rows]: any = await pool.query(
       'SELECT id, role FROM users WHERE username = ? AND password_hash = ?',
       [username, oldPassword]
     );
-    
+
     if (rows.length === 0) {
       return res.status(401).json({ error: 'Invalid current password' });
     }
-    
+
     // Update password (user resetting their own password)
     await pool.execute(
       'UPDATE users SET password_hash = ? WHERE username = ?',
       [newPassword, username]
     );
-    
+
     res.json({ success: true, message: 'Password updated successfully' });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -132,23 +132,23 @@ app.put('/api/users/:id/reset-password', async (req, res) => {
   try {
     const { id } = req.params;
     const { newPassword, adminUsername, adminPassword } = req.body;
-    
+
     // Verify admin credentials
     const [adminRows]: any = await pool.query(
       'SELECT id, role FROM users WHERE username = ? AND password_hash = ? AND role = ?',
       [adminUsername, adminPassword, 'Admin']
     );
-    
+
     if (adminRows.length === 0) {
       return res.status(401).json({ error: 'Admin authentication required' });
     }
-    
+
     // Update password for the target user
     await pool.execute(
       'UPDATE users SET password_hash = ? WHERE id = ?',
       [newPassword, id]
     );
-    
+
     res.json({ success: true, message: 'Password reset successfully' });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -267,16 +267,16 @@ app.get('/api/members', async (_req, res) => {
 app.post('/api/members', async (req, res) => {
   try {
     const { member_code, full_name_en, full_name_mm, phone, email, gender, membership_type_id, start_date, end_date, status, join_date, photo_url, address, emergency_name, emergency_phone, nrc, dob, notes } = req.body;
-    
+
     // Validate and convert membership_type_id
     const validMembershipTypeId = await validateMembershipType(membership_type_id);
-    
+
     // Convert dates to MySQL format
     const mysqlStartDate = toMySQLDateTime(start_date);
     const mysqlEndDate = toMySQLDateTime(end_date);
     const mysqlJoinDate = toMySQLDateTime(join_date) || toMySQLDateTime(new Date().toISOString());
     const mysqlDob = toMySQLDateTime(dob);
-    
+
     const [result]: any = await pool.execute(
       `INSERT INTO members (member_code, full_name_en, full_name_mm, phone, email, gender, membership_type_id, start_date, end_date, status, join_date, photo_url, address, emergency_name, emergency_phone, nrc, dob, notes)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -292,15 +292,15 @@ app.put('/api/members/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { full_name_en, full_name_mm, phone, email, gender, membership_type_id, start_date, end_date, status, photo_url, address, emergency_name, emergency_phone, nrc, dob, notes } = req.body;
-    
+
     // Validate and convert membership_type_id
     const validMembershipTypeId = await validateMembershipType(membership_type_id);
-    
+
     // Convert dates to MySQL format
     const mysqlStartDate = toMySQLDateTime(start_date);
     const mysqlEndDate = toMySQLDateTime(end_date);
     const mysqlDob = toMySQLDateTime(dob);
-    
+
     await pool.execute(
       `UPDATE members SET full_name_en = ?, full_name_mm = ?, phone = ?, email = ?, gender = ?, membership_type_id = ?, start_date = ?, end_date = ?, status = ?, photo_url = ?, address = ?, emergency_name = ?, emergency_phone = ?, nrc = ?, dob = ?, notes = ? WHERE id = ?`,
       [full_name_en, full_name_mm || null, phone, email || null, gender, validMembershipTypeId, mysqlStartDate, mysqlEndDate, status, photo_url || null, address || null, emergency_name || null, emergency_phone || null, nrc || null, mysqlDob, notes || null, id]
@@ -339,12 +339,12 @@ app.get('/api/products', async (_req, res) => {
 app.post('/api/products', async (req, res) => {
   try {
     const { name_en, name_mm, category_id, sku, price, cost_price, stock, low_stock_threshold, unit, image, is_active } = req.body;
-    
+
     // Validate category_id - must not be null
     if (!category_id) {
       return res.status(400).json({ error: 'category_id is required' });
     }
-    
+
     const [result]: any = await pool.execute(
       `INSERT INTO products (name_en, name_mm, category_id, sku, price, cost_price, stock, low_stock_threshold, unit, image, is_active)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -360,11 +360,11 @@ app.put('/api/products/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { name_en, name_mm, category_id, sku, price, cost_price, stock, low_stock_threshold, unit, image, is_active } = req.body;
-    
+
     // Build dynamic UPDATE query only for provided fields
     const updates: string[] = [];
     const values: any[] = [];
-    
+
     if (name_en !== undefined) {
       updates.push('name_en = ?');
       values.push(name_en);
@@ -413,12 +413,12 @@ app.put('/api/products/:id', async (req, res) => {
       updates.push('is_active = ?');
       values.push(is_active);
     }
-    
+
     // Only update if there are fields to update
     if (updates.length === 0) {
       return res.status(400).json({ error: 'No fields to update' });
     }
-    
+
     values.push(id);
     await pool.execute(
       `UPDATE products SET ${updates.join(', ')} WHERE id = ?`,
@@ -492,7 +492,7 @@ app.get('/api/transactions', async (req, res) => {
     }
     query += ' GROUP BY t.id ORDER BY t.date DESC';
     const [rows] = await pool.query(query, params);
-    
+
     // Fetch items for each transaction
     const transactions = await Promise.all((rows as any[]).map(async (txn: any) => {
       const [items] = await pool.query(
@@ -501,7 +501,7 @@ app.get('/api/transactions', async (req, res) => {
       );
       return { ...txn, items };
     }));
-    
+
     res.json(transactions);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -513,19 +513,19 @@ app.post('/api/transactions', async (req, res) => {
   try {
     await conn.beginTransaction();
     const { invoice_number, member_id, member_name, type, subtotal, discount, total, payment_method, date, processed_by, items } = req.body;
-    
+
     // Convert date to MySQL format
     const mysqlDate = toMySQLDateTime(date) || toMySQLDateTime(new Date().toISOString());
-    
+
     // Insert transaction
     const [txnResult]: any = await conn.execute(
       `INSERT INTO transactions (invoice_number, member_id, member_name, type, subtotal, discount, total, payment_method, date, processed_by)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [invoice_number, member_id || null, member_name || null, type, subtotal, discount || 0, total, payment_method, mysqlDate, processed_by || null]
     );
-    
+
     const txnId = txnResult.insertId;
-    
+
     // Insert transaction items and update stock
     for (const item of items) {
       await conn.execute(
@@ -533,7 +533,7 @@ app.post('/api/transactions', async (req, res) => {
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [txnId, item.type, item.membership_type_id || null, item.product_id || null, item.name, item.quantity, item.price]
       );
-      
+
       // Decrement product stock if it's a product
       if (item.type === 'Product' && item.product_id) {
         await conn.execute(
@@ -542,7 +542,7 @@ app.post('/api/transactions', async (req, res) => {
         );
       }
     }
-    
+
     await conn.commit();
     res.status(201).json({ id: txnId });
   } catch (error: any) {
@@ -557,14 +557,14 @@ app.post('/api/transactions', async (req, res) => {
 app.get('/api/staff', async (_req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM staff ORDER BY id DESC');
-    
+
     // Fetch weekly schedules for each staff
     const staffWithSchedules = await Promise.all((rows as any[]).map(async (s: any) => {
       const [schedules] = await pool.query(
         'SELECT * FROM staff_weekly_schedule WHERE staff_id = ?',
         [s.id]
       );
-      
+
       // Convert to WeeklySchedule format
       const weeklySchedule: any = {};
       (schedules as any[]).forEach((sch: any) => {
@@ -575,10 +575,10 @@ app.get('/api/staff', async (_req, res) => {
           shift: sch.shift
         };
       });
-      
+
       return { ...s, weeklySchedule };
     }));
-    
+
     res.json(staffWithSchedules);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -590,17 +590,17 @@ app.post('/api/staff', async (req, res) => {
   try {
     await conn.beginTransaction();
     const { staff_code, name, role, phone, email, join_date, salary, photo_url, status, weeklySchedule } = req.body;
-    
+
     const mysqlJoinDate = toMySQLDateTime(join_date) || toMySQLDateTime(new Date().toISOString());
-    
+
     const [result]: any = await conn.execute(
       `INSERT INTO staff (staff_code, name, role, phone, email, join_date, salary, photo_url, status)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [staff_code, name, role, phone, email || null, mysqlJoinDate, salary || null, photo_url || null, status || 'Active']
     );
-    
+
     const staffId = result.insertId;
-    
+
     // Insert weekly schedule
     if (weeklySchedule) {
       const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -615,7 +615,7 @@ app.post('/api/staff', async (req, res) => {
         }
       }
     }
-    
+
     await conn.commit();
     res.status(201).json({ id: staffId });
   } catch (error: any) {
@@ -632,11 +632,11 @@ app.put('/api/staff/:id', async (req, res) => {
     await conn.beginTransaction();
     const { id } = req.params;
     const { name, role, phone, email, salary, photo_url, status, weeklySchedule } = req.body;
-    
+
     // Build dynamic UPDATE query only for provided fields
     const updates: string[] = [];
     const values: any[] = [];
-    
+
     if (name !== undefined) {
       updates.push('name = ?');
       values.push(name);
@@ -665,7 +665,7 @@ app.put('/api/staff/:id', async (req, res) => {
       updates.push('status = ?');
       values.push(status);
     }
-    
+
     // Only update staff table if there are fields to update
     if (updates.length > 0) {
       values.push(id);
@@ -674,7 +674,7 @@ app.put('/api/staff/:id', async (req, res) => {
         values
       );
     }
-    
+
     // Update weekly schedule
     if (weeklySchedule) {
       await conn.execute('DELETE FROM staff_weekly_schedule WHERE staff_id = ?', [id]);
@@ -690,7 +690,7 @@ app.put('/api/staff/:id', async (req, res) => {
         }
       }
     }
-    
+
     await conn.commit();
     res.json({ success: true });
   } catch (error: any) {
@@ -717,7 +717,7 @@ app.get('/api/staff-attendance', async (req, res) => {
     const { staffId, dateFrom, dateTo } = req.query;
     let query = 'SELECT * FROM staff_attendance WHERE 1=1';
     const params: any[] = [];
-    
+
     if (staffId) {
       query += ' AND staff_id = ?';
       params.push(staffId);
@@ -730,7 +730,7 @@ app.get('/api/staff-attendance', async (req, res) => {
       query += ' AND date <= ?';
       params.push(dateTo);
     }
-    
+
     query += ' ORDER BY date DESC, clock_in DESC';
     const [rows] = await pool.query(query, params);
     res.json(rows);
@@ -776,7 +776,7 @@ app.get('/api/settings', async (_req, res) => {
     if (rows.length > 0) {
       res.json(rows[0]);
     } else {
-      res.json({ gym_name: 'A7 smart Gym System', address: '', phone: '', currency_symbol: 'Ks', tax_rate: 0 });
+      res.json({ gym_name: 'Ace GYM System', address: '', phone: '', currency_symbol: 'Ks', tax_rate: 0 });
     }
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -800,7 +800,7 @@ app.put('/api/settings', async (req, res) => {
 
 // Health check
 app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok', message: 'A7 smart Gym System API is running' });
+  res.json({ status: 'ok', message: 'Ace GYM System API is running' });
 });
 
 // SPA fallback - serve index.html for all non-API routes
@@ -824,7 +824,7 @@ app.use((req, res, next) => {
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 A7 smart Gym System API Server running on port ${PORT}`);
+  console.log(`🚀 Ace GYM System API Server running on port ${PORT}`);
   console.log(`📊 Database: power_plus_gym`);
   console.log(`🌐 API Base URL: http://0.0.0.0:${PORT}/api`);
   console.log(`🌐 External URL: http://167.172.90.182:${PORT}/api`);
